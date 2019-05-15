@@ -1,0 +1,27 @@
+﻿#pragma kernel CSMain
+
+
+
+uint _Count;
+RWStructuredBuffer<float> _V;
+StructuredBuffer<float> _U0;
+RWStructuredBuffer<float> _U1;
+
+float4 _Params; // c^2, 1/h^2, dt, maxSlope
+
+
+float mod(float x, float y) {
+	return x - y * floor(x / y);
+}
+float3 mod(float3 x, float3 y) {
+	return x - y * floor(x / y);
+}
+
+
+[numthreads(64,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID) {
+	uint3 i = mod(id.xxx + uint3(-1, 0, 1), _Count);
+	float a = _Params.x * (_U0[i.x] + _U0[i.z] - 2 * _U0[i.y]) * _Params.y;
+	_V[i.y] += a * _Params.z;
+	_U1[i.y] = _U0[i.y] + _V[i.y] * _Params.z;
+}
