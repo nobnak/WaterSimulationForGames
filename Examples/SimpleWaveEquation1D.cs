@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using WaterSimulationForGamesSystem;
 
-public class SimpleWaveEquation : MonoBehaviour {
+public class SimpleWaveEquation1D : MonoBehaviour {
 	[SerializeField]
 	protected float speed = 1f;
 	[SerializeField]
@@ -16,7 +16,7 @@ public class SimpleWaveEquation : MonoBehaviour {
 	[Range(1, 10)]
 	protected int quality = 1;
 
-	protected WaveEquation we;
+	protected WaveEquation1D we;
 	protected BarGraph graph;
 	protected Renderer rend;
 	protected Validator validator = new Validator();
@@ -28,7 +28,7 @@ public class SimpleWaveEquation : MonoBehaviour {
 
 	#region unity
 	private void OnEnable() {
-		we = new WaveEquation();
+		we = new WaveEquation1D();
 		graph = new BarGraph();
 		v = new GPUList<float>();
 		u0 = new GPUList<float>();

@@ -1,5 +1,5 @@
-﻿#pragma kernel Next1
-#pragma kernel Clamp1
+﻿#pragma kernel Next
+#pragma kernel Clamp
 
 #include "Assets/Packages/Gist/CGIncludes/Math.cginc"
 
@@ -15,7 +15,7 @@ float4 _Params; // c^2, 1/h^2, dt, maxSlope * h
 
 
 [numthreads(64,1,1)]
-void Next1(uint3 id : SV_DispatchThreadID) {
+void Next(uint3 id : SV_DispatchThreadID) {
 	uint3 i = clamp(id.xxx + uint3(-1, 0, 1), 0, _Count - 1);
 	float u = _U0[i.y];
 	float v = _V[i.y];
@@ -30,7 +30,7 @@ void Next1(uint3 id : SV_DispatchThreadID) {
 }
 
 [numthreads(64,1,1)]
-void Clamp1(uint3 id : SV_DispatchThreadID) {
+void Clamp(uint3 id : SV_DispatchThreadID) {
 	uint3 i = clamp(id.xxx + uint3(-1, 0, 1), 0, _Count - 1);
 	float u = _U0[i.y];
 	

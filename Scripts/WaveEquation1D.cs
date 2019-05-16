@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace WaterSimulationForGamesSystem {
 
-	public class WaveEquation : System.IDisposable {
+	public class WaveEquation1D : System.IDisposable {
 
-		public const string PATH = "WaterSimulationForGames/WaveEquation";
+		public const string PATH = "WaterSimulationForGames/WaveEquation1D";
 
 		public readonly static int P_COUNT = Shader.PropertyToID("_Count");
 		public readonly static int P_V = Shader.PropertyToID("_V");
@@ -21,10 +21,10 @@ namespace WaterSimulationForGamesSystem {
 		protected ComputeShader cs;
 
 		#region interface
-		public WaveEquation() {
+		public WaveEquation1D() {
 			cs = Resources.Load<ComputeShader>(PATH);
-			K_NEXT = cs.FindKernel("Next1");
-			K_CLAMP = cs.FindKernel("Clamp1");
+			K_NEXT = cs.FindKernel("Next");
+			K_CLAMP = cs.FindKernel("Clamp");
 
 			C = 1f;
 			H = 1f;
