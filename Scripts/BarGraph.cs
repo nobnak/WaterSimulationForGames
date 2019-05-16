@@ -1,10 +1,6 @@
 using nobnak.Gist;
-using nobnak.Gist.Extensions.Array;
 using nobnak.Gist.GPUBuffer;
 using nobnak.Gist.ObjectExt;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace WaterSimulationForGamesSystem {
@@ -25,7 +21,6 @@ namespace WaterSimulationForGamesSystem {
 		#region interface
 		public BarGraph() {
 			mat = new Material(Resources.Load<Shader>(PATH));
-			buf = new GPUList<float>();
 			validator.Validation += () => {
 				mat.SetColor(PROP_COLOR, color);
 				mat.SetBuffer(PROP_VALUES, buf);

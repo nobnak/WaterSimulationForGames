@@ -1,4 +1,7 @@
-﻿#pragma kernel CSMain
+﻿#pragma kernel Next1
+#pragma kernel Clamp1
+
+#include "Assets/Packages/Gist/CGIncludes/Math.cginc"
 
 
 
@@ -7,21 +10,33 @@ RWStructuredBuffer<float> _V;
 StructuredBuffer<float> _U0;
 RWStructuredBuffer<float> _U1;
 
-float4 _Params; // c^2, 1/h^2, dt, maxSlope
+float4 _Params; // c^2, 1/h^2, dt, maxSlope * h
 
-
-float mod(float x, float y) {
-	return x - y * floor(x / y);
-}
-float3 mod(float3 x, float3 y) {
-	return x - y * floor(x / y);
-}
 
 
 [numthreads(64,1,1)]
-void CSMain (uint3 id : SV_DispatchThreadID) {
-	uint3 i = mod(id.xxx + uint3(-1, 0, 1), _Count);
-	float a = _Params.x * (_U0[i.x] + _U0[i.z] - 2 * _U0[i.y]) * _Params.y;
-	_V[i.y] += a * _Params.z;
-	_U1[i.y] = _U0[i.y] + _V[i.y] * _Params.z;
+void Next1(uint3 id : SV_DispatchThreadID) {
+	uint3 i = clamp(id.xxx + uint3(-1, 0, 1), 0, _Count - 1);
+	float u = _U0[i.y];
+	float v = _V[i.y];
+	float uOffset = _U0[i.x] + _U0[i.z] - 2 * u;
+	float a = _Params.x * uOffset * _Params.y;
+
+	v += a * _Params.z;
+	u += v * _Params.z;
+
+	_V[i.y] = v;
+	_U1[i.y] = u;
+}
+
+[numthreads(64,1,1)]
+void Clamp1(uint3 id : SV_DispatchThreadID) {
+	uint3 i = clamp(id.xxx + uint3(-1, 0, 1), 0, _Count - 1);
+	float u = _U0[i.y];
+	
+	float uOffset = (_U0[i.x] + _U0[i.z] - 2 * u) / 2;
+	if (uOffset > _Params.w) u += uOffset - _Params.w;
+	if (uOffset < -_Params.w) u += uOffset + _Params.w;
+
+	_U1[i.y] = u;
 }
