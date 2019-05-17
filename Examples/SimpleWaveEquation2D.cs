@@ -9,40 +9,46 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 
 	[SerializeField]
 	protected float speed = 100f;
+	[SerializeField]
 	protected int count = 100;
 
+	protected Stamp stamp;
 	protected WaveEquation2D weq;
 	protected RenderTexture v;
 	protected RenderTexture u0, u1;
 
 	protected Validator validator = new Validator();
 	protected Material mat;
+	protected Collider col;
 	protected float time;
 	protected float dt;
 
 	#region unity
 	private void OnEnable() {
+		stamp = new Stamp();
 		weq = new WaveEquation2D();
 
 		validator.Reset();
 		validator.Validation += () => {
 			mat = GetComponent<Renderer>().sharedMaterial;
+			col = GetComponent<Collider>();
 
 			ReleaseTextures();
-			var desc = new RenderTextureDescriptor(count, count, RenderTextureFormat.RFloat, 0);
-			desc.enableRandomWrite = true;
-			desc.sRGB = false;
-			desc.useMipMap = false;
-			desc.autoGenerateMips = false;
-			v = new RenderTexture(desc);
-			u0 = new RenderTexture(desc);
-			u1 = new RenderTexture(desc);
-			v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
+
+			var format = RenderTextureFormat.RFloat;
+			v = new RenderTexture(count, count, 0, format, RenderTextureReadWrite.Linear);
+			u0 = new RenderTexture(count, count, 0, format, RenderTextureReadWrite.Linear);
+			u1 = new RenderTexture(count, count, 0, format, RenderTextureReadWrite.Linear);
+
+			v.enableRandomWrite = true;
+			u0.enableRandomWrite = true;
+			u1.enableRandomWrite = true;
+			//v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
 			v.wrapMode = u0.wrapMode = u1.wrapMode = TextureWrapMode.Clamp;
 
 			weq.C = speed;
 			weq.H = 100f / count;
-			weq.MaxSlope = 2f;
+			weq.MaxSlope = 1f;
 
 			time = 0f;
 			dt = Mathf.Min(weq.SupDt(), Time.fixedDeltaTime) * 0.5f;
@@ -51,21 +57,37 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 	}
 	private void OnDisable() {
 		weq.Dispose();
+		stamp.Dispose();
 		ReleaseTextures();
+	}
+	private void OnValidate() {
+		validator.Invalidate();
 	}
 	private void Update() {
 		validator.Validate();
+
+		if (Input.GetMouseButton(0)) {
+			var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			RaycastHit hit;
+			if (col.Raycast(ray, out hit, float.MaxValue)) {
+				var uv = hit.textureCoord;
+				Debug.LogFormat("Click on uv={0}", uv);
+				stamp.Draw(u0, uv, 0.5f * Vector2.one);
+			}
+		}
+
 		time += Time.deltaTime;
 		while (time >= dt) {
 			time -= dt;
 			weq.Next(u1, u0, v, dt);
 			Swap();
 		}
+
 		mat.mainTexture = u0;
 	}
-	#endregion
+#endregion
 
-	#region member
+#region member
 	private void ReleaseTextures() {
 		v.DestroySelf();
 		u0.DestroySelf();
@@ -76,5 +98,5 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 		u1 = u0;
 		u0 = tmp;
 	}
-	#endregion
+#endregion
 }

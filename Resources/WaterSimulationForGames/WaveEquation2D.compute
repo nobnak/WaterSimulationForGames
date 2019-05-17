@@ -19,13 +19,13 @@ void Next(uint3 id : SV_DispatchThreadID) {
 	uint2 c = id.xy;
 	float u = _U0[c];
 	float v = _V[c];
-	uint4 i = clamp(id.xyxy + uint4(-1, -1, 1, 1), 0, _Count.xyxy - 1);
+	uint4 i = uint4(c - 1, c + 1);
 
 	float uo = _U0[uint2(i.x, c.y)] 
 		+ _U0[uint2(i.z, c.y)]
-		+ _U0[uint2(c.x, i.y)]
-		+ _U0[uint2(c.x, i.w)]
-		- 4 * u;
+		//+ _U0[uint2(c.x, i.y)]
+		//+ _U0[uint2(c.x, i.w)]
+		- 2 * u;
 	float a = _Params.x * uo * _Params.y;
 
 	v += a * _Params.z;
@@ -42,6 +42,7 @@ void Clamp(uint3 id : SV_DispatchThreadID) {
 	float v = _V[c];
 	uint4 i = clamp(id.xyxy + uint4(-1, -1, 1, 1), 0, _Count.xyxy - 1);
 
+	#if false
 	float uo = (_U0[uint2(i.x, c.y)] 
 		+ _U0[uint2(i.z, c.y)]
 		+ _U0[uint2(c.x, i.y)]
@@ -49,6 +50,7 @@ void Clamp(uint3 id : SV_DispatchThreadID) {
 		- 4 * u) / 4;
 	if (uo > _Params.w) u += uo - _Params.w;
 	if (uo < -_Params.w) u += uo + _Params.w;
+	#endif
 
 	_U1[c] = u;
 }
