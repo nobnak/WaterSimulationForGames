@@ -34,23 +34,24 @@ namespace WaterSimulationForGamesSystem {
 		public float C { get ; set; }
 		public float H { get; set; }
 		public float MaxSlope { get; set; }
-		public void Next(ComputeBuffer u1, ComputeBuffer u0, ComputeBuffer v, int count, float dt) {
-			var cap = cs.DispatchSize(K_NEXT, new Vector3Int(count, 1, 1));
-			cs.SetInt(P_COUNT, count);
+		public void Next(RenderTexture u1, Texture u0, RenderTexture v, float dt) {
+			var cap = cs.DispatchSize(K_NEXT, new Vector3Int(u1.width, 1, 1));
+			cs.SetInt(P_COUNT, u1.width);
 			cs.SetVector(P_Params, Params(dt));
-			cs.SetBuffer(K_NEXT, P_V, v);
-			cs.SetBuffer(K_NEXT, P_U0, u0);
-			cs.SetBuffer(K_NEXT, P_U1, u1);
+			cs.SetTexture(K_NEXT, P_V, v);
+			cs.SetTexture(K_NEXT, P_U0, u0);
+			cs.SetTexture(K_NEXT, P_U1, u1);
 			cs.Dispatch(K_NEXT, cap.x, cap.y, cap.z);
 		}
-		public void Clamp(ComputeBuffer u1, ComputeBuffer u0, int count) {
-			var cap = cs.DispatchSize(K_CLAMP, new Vector3Int(count, 1, 1));
-			cs.SetInt(P_COUNT, count);
+		public void Clamp(RenderTexture u1, Texture u0) {
+			var cap = cs.DispatchSize(K_CLAMP, new Vector3Int(u1.width, 1, 1));
+			cs.SetInt(P_COUNT, u1.width);
 			cs.SetVector(P_Params, Params());
-			cs.SetBuffer(K_CLAMP, P_U0, u0);
-			cs.SetBuffer(K_CLAMP, P_U1, u1);
+			cs.SetTexture(K_CLAMP, P_U0, u0);
+			cs.SetTexture(K_CLAMP, P_U1, u1);
 			cs.Dispatch(K_CLAMP, cap.x, cap.y, cap.z);
 		}
+
 		public float SupDt() {
 			return H / C;
 		}

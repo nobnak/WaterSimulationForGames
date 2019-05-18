@@ -1,0 +1,42 @@
+﻿#pragma kernel Next
+#pragma kernel Clamp
+
+#include "Assets/Packages/Gist/CGIncludes/Math.cginc"
+
+
+
+uint _Count;
+RWStructuredBuffer<float> _V;
+StructuredBuffer<float> _U0;
+RWStructuredBuffer<float> _U1;
+
+float4 _Params; // c^2, 1/h^2, dt, maxSlope * h
+
+
+
+[numthreads(64,1,1)]
+void Next(uint3 id : SV_DispatchThreadID) {
+	uint3 i = clamp(id.xxx + int3(-1, 0, 1), 0, _Count - 1);
+	float u = _U0[i.y];
+	float v = _V[i.y];
+	float uOffset = _U0[i.x] + _U0[i.z] - 2 * u;
+	float a = _Params.x * uOffset * _Params.y;
+
+	v += a * _Params.z;
+	u += v * _Params.z;
+
+	_V[i.y] = v;
+	_U1[i.y] = u;
+}
+
+[numthreads(64,1,1)]
+void Clamp(uint3 id : SV_DispatchThreadID) {
+	uint3 i = clamp(id.xxx + int3(-1, 0, 1), 0, _Count - 1);
+	float u = _U0[i.y];
+	
+	float uOffset = (_U0[i.x] + _U0[i.z] - 2 * u) / 2;
+	if (uOffset > _Params.w) u += uOffset - _Params.w;
+	if (uOffset < -_Params.w) u += uOffset + _Params.w;
+
+	_U1[i.y] = u;
+}

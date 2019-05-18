@@ -8,18 +8,18 @@ using UnityEngine;
 namespace WaterSimulationForGamesSystem.Examples {
 
 	[ExecuteInEditMode]
-	public class SimpleBarSetter : MonoBehaviour {
+	public class SimpleBarSetterBuf : MonoBehaviour {
 
 		[SerializeField]
 		protected float[] values = new float[0];
 
 		protected GPUList<float> buf;
 		protected Renderer rend;
-		protected BarGraph graph;
+		protected BarGraphBuf graph;
 
 		#region unity
 		private void OnEnable() {
-			graph = new BarGraph();
+			graph = new BarGraphBuf();
 			buf = new GPUList<float>();
 
 			rend = GetComponent<Renderer>();

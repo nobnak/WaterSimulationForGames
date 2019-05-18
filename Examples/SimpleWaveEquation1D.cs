@@ -1,5 +1,7 @@
 using nobnak.Gist;
 using nobnak.Gist.GPUBuffer;
+using nobnak.Gist.ObjectExt;
+using nobnak.Gist.Scoped;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,26 +17,31 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 	[SerializeField]
 	[Range(1, 10)]
 	protected int quality = 1;
+	[SerializeField]
+	protected bool update;
 
+	protected Stamp stamp;
+	protected Clear clear;
 	protected WaveEquation1D we;
 	protected BarGraph graph;
 	protected Renderer rend;
+	protected Collider col;
 	protected Validator validator = new Validator();
 
 	protected float time;
 	protected float dt;
-	protected GPUList<float> v;
-	protected GPUList<float> u0, u1;
+	protected RenderTexture v;
+	protected RenderTexture u0, u1;
 
 	#region unity
 	private void OnEnable() {
 		we = new WaveEquation1D();
 		graph = new BarGraph();
-		v = new GPUList<float>();
-		u0 = new GPUList<float>();
-		u1 = new GPUList<float>();
+		stamp = new Stamp();
+		clear = new Clear();
 
 		rend = GetComponent<Renderer>();
+		col = GetComponent<Collider>();
 
 		validator.Reset();
 		validator.Validation += () => {
@@ -45,53 +52,79 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 			graph.Peak = maxSlope * 2;
 
 			time = 0f;
-			dt = Mathf.Min(we.SupDt(), Time.fixedDeltaTime) / (2 * quality);
+			dt = Mathf.Min(we.SupDt(), 0.1f) / (2 * quality);
 			Debug.LogFormat("Set dt={0} for speed={1}", dt, speed);
 
-			var dw = 4f / count;
-			var offset = dw * 0.5f * count;
-			var dam = Mathf.RoundToInt(0.1f * count);
-			v.Clear();
-			u0.Clear();
-			u1.Clear();
-			for (var i = 0; i < count; i++) {
-				var w = 1f - Mathf.Clamp01(Mathf.Abs(dw * i - offset));
-				u0.Add(w);
-				u1.Add(0);
-				v.Add(0);
+			ReleaseBuffers();
+
+			var format = UnityEngine.Experimental.Rendering.GraphicsFormat.R32_SFloat;
+			v = new RenderTexture(count, 1, 0, format) {
+				enableRandomWrite = true
+			};
+			u0 = new RenderTexture(v.descriptor);
+			u1 = new RenderTexture(v.descriptor);
+			v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
+			v.Create();
+			u0.Create();
+			u1.Create();
+			
+			foreach (var r in new RenderTexture[] { v, u0, u1 }) {
+				using (new RenderTextureActivator(r)) {
+					clear.Do(r);
+				}
 			}
 		};
 	}
+
 	private void OnDisable() {
 		we.Dispose();
-		v.Dispose();
-		u0.Dispose();
-		u1.Dispose();
+		stamp.Dispose();
+		clear.Dispose();
+		ReleaseBuffers();
 	}
 	private void OnValidate() {
-		validator.Invalidate();
+		//validator.Invalidate();
 	}
 	private void Update() {
 		validator.Validate();
 
-		time += Time.deltaTime;
-		while (time >= dt) {
-			time -= dt;
-			we.Next(u1, u0, v, count, dt);
-			Swap();
-			we.Clamp(u1, u0, count);
-			Swap();
+		if (Input.GetMouseButton(0)) {
+			var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			RaycastHit hit;
+			if (col.Raycast(ray, out hit, float.MaxValue)) {
+				var uv = hit.textureCoord;
+				Debug.LogFormat("Click on uv={0}", uv);
+				stamp.Draw(u0, uv, 0.1f * Vector2.one);
+			}
 		}
+
+		if (update) {
+			time += Time.deltaTime;
+			while (time >= dt) {
+				time -= dt;
+				we.Next(u1, u0, v, dt);
+				Swap();
+				we.Clamp(u1, u0);
+				Swap();
+			}
+		}
+
 		graph.Input = u0;
 		rend.sharedMaterial = graph.Output;
 	}
-	#endregion
+#endregion
 
-	#region member
+#region member
 	private void Swap() {
 		var tmp = u1;
 		u1 = u0;
 		u0 = tmp;
 	}
-	#endregion
+	private void ReleaseBuffers() {
+		v.DestroySelf();
+		u0.DestroySelf();
+		u1.DestroySelf();
+	}
+
+#endregion
 }

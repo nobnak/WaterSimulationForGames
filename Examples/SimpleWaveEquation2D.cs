@@ -1,4 +1,5 @@
 using nobnak.Gist;
+using nobnak.Gist.Extensions.GPUExt;
 using nobnak.Gist.ObjectExt;
 using System.Collections;
 using System.Collections.Generic;
@@ -35,15 +36,19 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 
 			ReleaseTextures();
 
-			var format = RenderTextureFormat.RFloat;
-			v = new RenderTexture(count, count, 0, format, RenderTextureReadWrite.Linear);
-			u0 = new RenderTexture(count, count, 0, format, RenderTextureReadWrite.Linear);
-			u1 = new RenderTexture(count, count, 0, format, RenderTextureReadWrite.Linear);
+			var size = weq.CeilSize(new Vector3Int(count, count, 1));
+			var format = UnityEngine.Experimental.Rendering.GraphicsFormat.R32_SFloat;
+			v = new RenderTexture(size.x, size.y, 0, format) {
+				enableRandomWrite = true,
+				useMipMap = false,
+				autoGenerateMips = false,
+				anisoLevel = 0
+			};
 
-			v.enableRandomWrite = true;
-			u0.enableRandomWrite = true;
-			u1.enableRandomWrite = true;
-			//v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
+			u0 = new RenderTexture(v.descriptor);
+			u1 = new RenderTexture(v.descriptor);
+
+			v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
 			v.wrapMode = u0.wrapMode = u1.wrapMode = TextureWrapMode.Clamp;
 
 			weq.C = speed;

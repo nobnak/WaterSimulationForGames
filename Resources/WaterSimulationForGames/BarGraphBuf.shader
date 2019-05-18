@@ -1,13 +1,10 @@
-﻿Shader "Hidden/Stamp" {
+﻿Shader "Unlit/BarGraph-Buf" {
     Properties {
-        _MainTex ("Texture", 2D) = "black" {}
-		_Amp ("Amplitude", Float) = 1
+		_Color ("Color", Color) = (1,1,1,1)
+		_Params ("Params", Vector) = (1,1,1,1)
     }
     SubShader {
-        Cull Off ZWrite Off ZTest Always
-
-		//BlendOp Max
-		Blend One One
+        Tags { "RenderType"="Opaque" }
 
         Pass {
             CGPROGRAM
@@ -26,26 +23,23 @@
                 float4 vertex : SV_POSITION;
             };
 
-            sampler2D _MainTex;
-			float4 _MainTex_TexelSize;
-			float _Amp;
-			float4x4 _UvMat;
+			float4 _Color;
+			float4 _Params;
+
+			StructuredBuffer<float> _Values;
 
             v2f vert (appdata v) {
-				float2 uv = v.uv;
-
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = uv;
+                o.uv = v.uv;
                 return o;
             }
 
-            float4 frag (v2f i) : SV_Target {
-				float2 uv = mul(_UvMat, float4(i.uv, 0, 1)).xy;
-				if (any(uv > 1) || any(uv < 0))
-					discard;
-                float4 col = tex2D(_MainTex, uv);
-                return col * _Amp;
+            fixed4 frag (v2f i) : SV_Target {
+				float2 uv = i.uv;
+				uint key = (uint)(uv.x * _Params.x + _Params.y);
+				float v = _Values[key] * _Params.z + _Params.w;
+				return ((_Params.w < v) ? (_Params.w < uv.y && uv.y < v) : (v < uv.y && uv.y < _Params.w)) ? _Color : 0;
             }
             ENDCG
         }

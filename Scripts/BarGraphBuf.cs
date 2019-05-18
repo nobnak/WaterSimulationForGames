@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace WaterSimulationForGamesSystem {
 
-	public class BarGraph : System.IDisposable {
-		public static readonly string PATH = "WaterSimulationForGames/BarGraph";
+	public class BarGraphBuf : System.IDisposable {
+		public static readonly string PATH = "WaterSimulationForGames/BarGraphBuf";
 
 		public static readonly int PROP_COLOR = Shader.PropertyToID("_Color");
 		public static readonly int PROP_VALUES = Shader.PropertyToID("_Values");
@@ -14,18 +14,18 @@ namespace WaterSimulationForGamesSystem {
 
 		protected Validator validator = new Validator();
 		protected Color color = Color.magenta;
-		protected Texture buf;
+		protected GPUList<float> buf;
 		protected float peak;
 		protected Material mat;
 
 		#region interface
-		public BarGraph() {
+		public BarGraphBuf() {
 			mat = new Material(Resources.Load<Shader>(PATH));
 			validator.Validation += () => {
 				mat.SetColor(PROP_COLOR, color);
-				mat.SetTexture(PROP_VALUES, buf);
+				mat.SetBuffer(PROP_VALUES, buf);
 				mat.SetVector(PROP_PARAMS, new Vector4(
-					buf.width, 0f, 
+					buf.Count, 0f, 
 					0.5f / Mathf.Max(peak, 1e-6f), 0.5f));
 			};
 		}
@@ -49,7 +49,7 @@ namespace WaterSimulationForGamesSystem {
 				peak = value;
 			}
 		}
-		public Texture Input {
+		public GPUList<float> Input {
 			set {
 				validator.Invalidate();
 				buf = value;

@@ -5,38 +5,38 @@
 
 
 
-uint _Count;
-RWStructuredBuffer<float> _V;
-StructuredBuffer<float> _U0;
-RWStructuredBuffer<float> _U1;
+int _Count;
+RWTexture2D<float> _V;
+Texture2D<float> _U0;
+RWTexture2D<float> _U1;
 
 float4 _Params; // c^2, 1/h^2, dt, maxSlope * h
-
+float _ClearValue;
 
 
 [numthreads(64,1,1)]
 void Next(uint3 id : SV_DispatchThreadID) {
-	uint3 i = clamp(id.xxx + uint3(-1, 0, 1), 0, _Count - 1);
-	float u = _U0[i.y];
-	float v = _V[i.y];
-	float uOffset = _U0[i.x] + _U0[i.z] - 2 * u;
-	float a = _Params.x * uOffset * _Params.y;
+	int3 i = clamp(id.xxx + int3(-1, 0, 1), 0, _Count - 1);
+	float u = _U0[int2(i.y, 0)];
+	float v = _V[int2(i.y, 0)];
+	float uo = _U0[int2(i.x, 0)] + _U0[int2(i.z, 0)] - 2 * u;
+	float a = _Params.x * uo * _Params.y;
 
 	v += a * _Params.z;
 	u += v * _Params.z;
 
-	_V[i.y] = v;
-	_U1[i.y] = u;
+	_V[int2(i.y, 0)] = v;
+	_U1[int2(i.y, 0)] = u;
 }
 
 [numthreads(64,1,1)]
 void Clamp(uint3 id : SV_DispatchThreadID) {
-	uint3 i = clamp(id.xxx + uint3(-1, 0, 1), 0, _Count - 1);
-	float u = _U0[i.y];
+	int3 i = clamp(id.xxx + int3(-1, 0, 1), 0, _Count - 1);
+	float u = _U0[int2(i.y, 0)];
 	
-	float uOffset = (_U0[i.x] + _U0[i.z] - 2 * u) / 2;
+	float uOffset = (_U0[int2(i.x, 0)] + _U0[int2(i.z, 0)] - 2 * u) / 2;
 	if (uOffset > _Params.w) u += uOffset - _Params.w;
 	if (uOffset < -_Params.w) u += uOffset + _Params.w;
 
-	_U1[i.y] = u;
+	_U1[int2(i.y, 0)] = u;
 }
