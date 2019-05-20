@@ -6,6 +6,7 @@
 
 
 int _Count;
+Texture2D<int> _B;
 RWTexture2D<float> _V;
 Texture2D<float> _U0;
 RWTexture2D<float> _U1;
@@ -16,27 +17,36 @@ float _ClearValue;
 
 [numthreads(64,1,1)]
 void Next(uint3 id : SV_DispatchThreadID) {
-	int3 i = clamp(id.xxx + int3(-1, 0, 1), 0, _Count - 1);
-	float u = _U0[int2(i.y, 0)];
-	float v = _V[int2(i.y, 0)];
-	float uo = _U0[int2(i.x, 0)] + _U0[int2(i.z, 0)] - 2 * u;
+	int2 c = int2(id.x, 0);
+	int b = _B[c];
+	if (b  != 0) 
+		return;
+	float u = _U0[c];
+	float v = _V[c];
+
+	int4 i1 = clamp(int4(id.x, 0, id.x, 0) + int4(-1, 0, 1, 0), 0, _Count - 1);
+	int2 b1 = int2(_B[i1.xy], _B[i1.zw]);
+	float2 u1 = float2(b1.x == 0 ? _U0[i1.xy] : u, b1.y == 0 ? _U0[i1.zw] : u);
+	float uo = dot(float3(u1, u), float3(1, 1, -2));
 	float a = _Params.x * uo * _Params.y;
 
 	v += a * _Params.z;
 	u += v * _Params.z;
 
-	_V[int2(i.y, 0)] = v;
-	_U1[int2(i.y, 0)] = u;
+	_V[c] = v;
+	_U1[c] = u;
 }
 
 [numthreads(64,1,1)]
 void Clamp(uint3 id : SV_DispatchThreadID) {
-	int3 i = clamp(id.xxx + int3(-1, 0, 1), 0, _Count - 1);
-	float u = _U0[int2(i.y, 0)];
-	
-	float uOffset = (_U0[int2(i.x, 0)] + _U0[int2(i.z, 0)] - 2 * u) / 2;
-	if (uOffset > _Params.w) u += uOffset - _Params.w;
-	if (uOffset < -_Params.w) u += uOffset + _Params.w;
+	int2 c = int2(id.x, 0);
+	int b = _B[c];
+	float u = _U0[c];
+	float v = _V[c];
 
-	_U1[int2(i.y, 0)] = u;
+	v = lerp(v, 0, 1e-2 * _Params.z);
+	u = lerp(u, 0, 1e-2 * _Params.z);
+	
+	_V[c] = v;
+	_U1[c] = u;
 }

@@ -1,0 +1,25 @@
+﻿#pragma kernel UploadFloat
+#pragma kernel UploadInt
+
+int2 _Count;
+
+StructuredBuffer<float> _FloatValues;
+RWTexture2D<float> _FloatTex;
+
+StructuredBuffer<int> _IntValues;
+RWTexture2D<int> _IntTex;
+
+[numthreads(8,8,1)]
+void UploadFloat (uint3 id : SV_DispatchThreadID) {
+	int i = dot(id.xy, int2(1, _Count.x));
+	float v = _FloatValues[i];
+
+	_FloatTex[id.xy] = v;
+}
+[numthreads(8,8,1)]
+void UploadInt (uint3 id : SV_DispatchThreadID) {
+	int i = dot(id.xy, int2(1, _Count.x));
+	int v = _IntValues[i];
+
+	_IntTex[id.xy] = v;
+}

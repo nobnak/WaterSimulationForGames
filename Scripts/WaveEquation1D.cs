@@ -10,6 +10,7 @@ namespace WaterSimulationForGamesSystem {
 		public const string PATH = "WaterSimulationForGames/WaveEquation1D";
 
 		public readonly static int P_COUNT = Shader.PropertyToID("_Count");
+		public readonly static int P_B = Shader.PropertyToID("_B");
 		public readonly static int P_V = Shader.PropertyToID("_V");
 		public readonly static int P_U0 = Shader.PropertyToID("_U0");
 		public readonly static int P_U1 = Shader.PropertyToID("_U1");
@@ -34,19 +35,22 @@ namespace WaterSimulationForGamesSystem {
 		public float C { get ; set; }
 		public float H { get; set; }
 		public float MaxSlope { get; set; }
-		public void Next(RenderTexture u1, Texture u0, RenderTexture v, float dt) {
+		public void Next(RenderTexture u1, Texture u0, RenderTexture v, RenderTexture b, float dt) {
 			var cap = cs.DispatchSize(K_NEXT, new Vector3Int(u1.width, 1, 1));
 			cs.SetInt(P_COUNT, u1.width);
 			cs.SetVector(P_Params, Params(dt));
+			cs.SetTexture(K_NEXT, P_B, b);
 			cs.SetTexture(K_NEXT, P_V, v);
 			cs.SetTexture(K_NEXT, P_U0, u0);
 			cs.SetTexture(K_NEXT, P_U1, u1);
 			cs.Dispatch(K_NEXT, cap.x, cap.y, cap.z);
 		}
-		public void Clamp(RenderTexture u1, Texture u0) {
+		public void Clamp(RenderTexture u1, Texture u0, RenderTexture v, RenderTexture b) {
 			var cap = cs.DispatchSize(K_CLAMP, new Vector3Int(u1.width, 1, 1));
 			cs.SetInt(P_COUNT, u1.width);
 			cs.SetVector(P_Params, Params());
+			cs.SetTexture(K_CLAMP, P_B, b);
+			cs.SetTexture(K_CLAMP, P_V, v);
 			cs.SetTexture(K_CLAMP, P_U0, u0);
 			cs.SetTexture(K_CLAMP, P_U1, u1);
 			cs.Dispatch(K_CLAMP, cap.x, cap.y, cap.z);

@@ -1,18 +1,29 @@
-﻿#pragma kernel Clear2D
+﻿#pragma kernel ClearFloat
+#pragma kernel ClearInt
 
 #include "Assets/Packages/Gist/CGIncludes/Math.cginc"
 
 int2 _Count;
-RWTexture2D<float> _Tex;
+RWTexture2D<float> _FloatTex;
+RWTexture2D<int> _IntTex;
 
-float _ClearValue;
+float _FloatClearValue;
+float _IntClearValue;
 
 
 
 [numthreads(8,8,1)]
-void Clear2D(uint3 id : SV_DispatchThreadID) {
-	if (any(id.xy >= _Count))
+void ClearFloat(uint3 id : SV_DispatchThreadID) {
+	if (any(id.xy >= (uint2)_Count))
 		return;
 
-	_Tex[id.xy] = _ClearValue;
+	_FloatTex[id.xy] = _FloatClearValue;
+}
+
+[numthreads(8,8,1)]
+void ClearInt(uint3 id : SV_DispatchThreadID) {
+	if (any(id.xy >= (uint2)_Count))
+		return;
+
+	_IntTex[id.xy] = _IntClearValue;
 }

@@ -1,6 +1,7 @@
 using nobnak.Gist;
 using nobnak.Gist.Extensions.GPUExt;
 using nobnak.Gist.ObjectExt;
+using nobnak.Gist.Scoped;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,10 +12,18 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 	[SerializeField]
 	protected float speed = 100f;
 	[SerializeField]
+	protected float maxSlope = 1f;
+	[SerializeField]
 	protected int count = 100;
+	[Range(1, 10)]
+	[SerializeField]
+	protected int quality = 1;
+	[SerializeField]
+	protected bool update;
 
 	protected Stamp stamp;
-	protected WaveEquation2D weq;
+	protected Clear clear;
+	protected WaveEquation2D wave;
 	protected RenderTexture v;
 	protected RenderTexture u0, u1;
 
@@ -27,7 +36,8 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 	#region unity
 	private void OnEnable() {
 		stamp = new Stamp();
-		weq = new WaveEquation2D();
+		clear = new Clear();
+		wave = new WaveEquation2D();
 
 		validator.Reset();
 		validator.Validation += () => {
@@ -36,7 +46,8 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 
 			ReleaseTextures();
 
-			var size = weq.CeilSize(new Vector3Int(count, count, 1));
+			var size = wave.CeilSize(new Vector3Int(count, count, 1));
+			Debug.LogFormat("Set size={0}", size);
 			var format = UnityEngine.Experimental.Rendering.GraphicsFormat.R32_SFloat;
 			v = new RenderTexture(size.x, size.y, 0, format) {
 				enableRandomWrite = true,
@@ -44,29 +55,32 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 				autoGenerateMips = false,
 				anisoLevel = 0
 			};
-
 			u0 = new RenderTexture(v.descriptor);
 			u1 = new RenderTexture(v.descriptor);
 
 			v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
 			v.wrapMode = u0.wrapMode = u1.wrapMode = TextureWrapMode.Clamp;
 
-			weq.C = speed;
-			weq.H = 100f / count;
-			weq.MaxSlope = 1f;
+			foreach (var r in new RenderTexture[] { v, u0, u1}) {
+				using (new RenderTextureActivator(r)) {
+					clear.Int(r);
+				}
+			}
+
+			wave.C = speed;
+			wave.H = 1000f / v.width;
+			wave.MaxSlope = maxSlope;
 
 			time = 0f;
-			dt = Mathf.Min(weq.SupDt(), Time.fixedDeltaTime) * 0.5f;
+			dt = Mathf.Min(wave.SupDt(), 0.1f) / (2 * quality);
 			Debug.LogFormat("Set dt={0}", dt);
 		};
 	}
 	private void OnDisable() {
-		weq.Dispose();
+		wave.Dispose();
+		clear.Dispose();
 		stamp.Dispose();
 		ReleaseTextures();
-	}
-	private void OnValidate() {
-		validator.Invalidate();
 	}
 	private void Update() {
 		validator.Validate();
@@ -76,16 +90,20 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 			RaycastHit hit;
 			if (col.Raycast(ray, out hit, float.MaxValue)) {
 				var uv = hit.textureCoord;
-				Debug.LogFormat("Click on uv={0}", uv);
-				stamp.Draw(u0, uv, 0.5f * Vector2.one);
+				var w = 3f * (2f * Mathf.PI) * Time.time;
+				stamp.Draw(u0, uv, 0.01f * Vector2.one, Mathf.Sin(w));
 			}
 		}
 
-		time += Time.deltaTime;
-		while (time >= dt) {
-			time -= dt;
-			weq.Next(u1, u0, v, dt);
-			Swap();
+		if (update) {
+			time += Time.deltaTime;
+			while (time >= dt) {
+				time -= dt;
+				wave.Next(u1, u0, v, dt);
+				Swap();
+				wave.Clamp(u1, u0, v);
+				Swap();
+			}
 		}
 
 		mat.mainTexture = u0;

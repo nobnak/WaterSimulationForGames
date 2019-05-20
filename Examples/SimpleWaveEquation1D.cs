@@ -22,6 +22,7 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 
 	protected Stamp stamp;
 	protected Clear clear;
+	protected Uploader uploader;
 	protected WaveEquation1D we;
 	protected BarGraph graph;
 	protected Renderer rend;
@@ -32,6 +33,7 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 	protected float dt;
 	protected RenderTexture v;
 	protected RenderTexture u0, u1;
+	protected RenderTexture b;
 
 	#region unity
 	private void OnEnable() {
@@ -39,12 +41,41 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 		graph = new BarGraph();
 		stamp = new Stamp();
 		clear = new Clear();
+		uploader = new Uploader();
 
 		rend = GetComponent<Renderer>();
 		col = GetComponent<Collider>();
 
 		validator.Reset();
 		validator.Validation += () => {
+			ReleaseBuffers();
+
+			var formatfloat = RenderTextureFormat.RFloat;
+			var formatint = RenderTextureFormat.RInt;
+			v = new RenderTexture(count, 1, 0, formatfloat) {
+				enableRandomWrite = true
+			};
+			u0 = new RenderTexture(v.descriptor);
+			u1 = new RenderTexture(v.descriptor);
+			b = new RenderTexture(count, 1, 0, formatint, RenderTextureReadWrite.Linear) {
+				enableRandomWrite = true
+			};
+			v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
+			v.wrapMode = u0.wrapMode = u1.wrapMode = TextureWrapMode.Clamp;
+			v.Create();
+			u0.Create();
+			u1.Create();
+			b.Create();
+			
+			foreach (var r in new RenderTexture[] { v, u0, u1 })
+				clear.Float(r);
+
+			var bs = new int[count];
+			var mod = Mathf.RoundToInt(count / 2f);
+			for (var i = 0; i < bs.Length; i++)
+				bs[i] = ((i % mod) == 0) ? 1 : 0;
+			uploader.Upload(b, bs);
+
 			we.C = speed;
 			we.H = 1000f / count;
 			we.MaxSlope = maxSlope;
@@ -54,25 +85,6 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 			time = 0f;
 			dt = Mathf.Min(we.SupDt(), 0.1f) / (2 * quality);
 			Debug.LogFormat("Set dt={0} for speed={1}", dt, speed);
-
-			ReleaseBuffers();
-
-			var format = UnityEngine.Experimental.Rendering.GraphicsFormat.R32_SFloat;
-			v = new RenderTexture(count, 1, 0, format) {
-				enableRandomWrite = true
-			};
-			u0 = new RenderTexture(v.descriptor);
-			u1 = new RenderTexture(v.descriptor);
-			v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
-			v.Create();
-			u0.Create();
-			u1.Create();
-			
-			foreach (var r in new RenderTexture[] { v, u0, u1 }) {
-				using (new RenderTextureActivator(r)) {
-					clear.Do(r);
-				}
-			}
 		};
 	}
 
@@ -93,6 +105,7 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 			RaycastHit hit;
 			if (col.Raycast(ray, out hit, float.MaxValue)) {
 				var uv = hit.textureCoord;
+				uv.y = 0.5f;
 				Debug.LogFormat("Click on uv={0}", uv);
 				stamp.Draw(u0, uv, 0.1f * Vector2.one);
 			}
@@ -102,9 +115,9 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 			time += Time.deltaTime;
 			while (time >= dt) {
 				time -= dt;
-				we.Next(u1, u0, v, dt);
+				we.Next(u1, u0, v, b, dt);
 				Swap();
-				we.Clamp(u1, u0);
+				we.Clamp(u1, u0, v, b);
 				Swap();
 			}
 		}
@@ -121,6 +134,7 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 		u0 = tmp;
 	}
 	private void ReleaseBuffers() {
+		b.DestroySelf();
 		v.DestroySelf();
 		u0.DestroySelf();
 		u1.DestroySelf();

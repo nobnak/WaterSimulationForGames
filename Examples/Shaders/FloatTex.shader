@@ -1,8 +1,7 @@
-﻿Shader "Unlit/Wave" {
+﻿Shader "Unlit/FloatTex" {
     Properties {
-        _MainTex ("Texture", 2D) = "black" {}
-		_Color ("Color", Color) = (1,0,0,1)
-		_Height ("Height", Float) = 1
+		_TargetTex ("Main Tex", 2D) = "white" {}
+		_Comp ("Greater equals", Float) = 0
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -24,24 +23,22 @@
                 float4 vertex : SV_POSITION;
             };
 
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
-
-			float4 _Color;
-			float _Height;
+			Texture2D<float> _TargetTex;
+			Float _Comp;
 
             v2f vert (appdata v) {
+				uint w, h;
+				_TargetTex.GetDimensions(w, h);
+
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.uv = v.uv * float2(w, h);
                 return o;
             }
 
-            float4 frag (v2f i) : SV_Target {
-                float u = tex2D(_MainTex, i.uv).x;
-				float4 c1 = 1 - float4(_Color.xyz, 0);
-				float t = u / _Height;
-				return (t >= 0) ? lerp(0, _Color, t) : lerp(0, c1, -t);
+            fixed4 frag (v2f i) : SV_Target {
+                int v = _TargetTex[int2(i.uv)];
+                return v >= _Comp;
             }
             ENDCG
         }

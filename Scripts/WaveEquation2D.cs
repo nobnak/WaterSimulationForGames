@@ -36,7 +36,7 @@ namespace WaterSimulationForGamesSystem {
 		public float MaxSlope { get; set; }
 		public void Next(RenderTexture u1, Texture u0, RenderTexture v, float dt) {
 			var size = new Vector3Int(v.width, v.height, 1);
-			Vector3Int cap = DispatchSize(size);
+			var cap = DispatchSize(size);
 			cs.SetInts(P_COUNT, size.x, size.y);
 			cs.SetVector(P_Params, Params(dt));
 			cs.SetTexture(K_NEXT, P_V, v);
@@ -45,11 +45,12 @@ namespace WaterSimulationForGamesSystem {
 			cs.Dispatch(K_NEXT, cap.x, cap.y, cap.z);
 		}
 
-		public void Clamp(RenderTexture u1, Texture u0) {
+		public void Clamp(RenderTexture u1, Texture u0, RenderTexture v) {
 			var size = new Vector3Int(u0.width, u0.height, 1);
 			var cap = DispatchSize(size);
 			cs.SetInts(P_COUNT, size.x, size.y);
 			cs.SetVector(P_Params, Params());
+			cs.SetTexture(K_CLAMP, P_V, v);
 			cs.SetTexture(K_CLAMP, P_U0, u0);
 			cs.SetTexture(K_CLAMP, P_U1, u1);
 			cs.Dispatch(K_CLAMP, cap.x, cap.y, cap.z);

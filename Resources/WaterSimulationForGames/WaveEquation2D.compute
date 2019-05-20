@@ -19,11 +19,10 @@ void Next(uint3 id : SV_DispatchThreadID) {
 	int2 c = id.xy;
 	float u = _U0[c];
 	float v = _V[c];
-	int4 i = int4(c - 1, c + 1);
+	int4 ix = clamp(c.xyxy + int4(-1, 0, 1, 0), 0, _Count.xyxy - 1);
+	int4 iy = clamp(c.xyxy + int4(0, -1, 0, 1), 0, _Count.xyxy - 1);
 
-	float uo = _U0[c + int2(-1, 0)] 
-		+ _U0[c + int2(1, 0)]
-		- 2 * u;
+	float uo = _U0[ix.xy] + _U0[ix.zw] + _U0[iy.xy] + _U0[iy.zw] - 4 * u;
 	float a = _Params.x * uo * _Params.y;
 
 	v += a * _Params.z;
@@ -37,5 +36,11 @@ void Next(uint3 id : SV_DispatchThreadID) {
 void Clamp(uint3 id : SV_DispatchThreadID) {
 	int2 c = id.xy;
 	float u = _U0[c];
+	float v = _V[c];
+
+	v= lerp(v, 0, saturate(1e-2 * _Params.z));
+	u = lerp(u, 0, saturate(1e-2 * _Params.z));
+
+	_V[c] = v;
 	_U1[c] = u;
 }
