@@ -26,6 +26,7 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 	protected WaveEquation2D wave;
 	protected RenderTexture v;
 	protected RenderTexture u0, u1;
+	protected RenderTexture b;
 
 	protected Validator validator = new Validator();
 	protected Material mat;
@@ -48,24 +49,27 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 
 			var size = wave.CeilSize(new Vector3Int(count, count, 1));
 			Debug.LogFormat("Set size={0}", size);
-			var format = UnityEngine.Experimental.Rendering.GraphicsFormat.R32_SFloat;
-			v = new RenderTexture(size.x, size.y, 0, format) {
+			var formatf = UnityEngine.Experimental.Rendering.GraphicsFormat.R32_SFloat;
+			var formati = RenderTextureFormat.RInt;
+			v = new RenderTexture(size.x, size.y, 0, formatf) {
 				enableRandomWrite = true,
-				useMipMap = false,
-				autoGenerateMips = false,
-				anisoLevel = 0
 			};
 			u0 = new RenderTexture(v.descriptor);
 			u1 = new RenderTexture(v.descriptor);
+			b = new RenderTexture(size.x, size.y, 0, formati) {
+				enableRandomWrite = true,
+			};
+			v.Create();
+			u0.Create();
+			u1.Create();
+			b.Create();
 
 			v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
 			v.wrapMode = u0.wrapMode = u1.wrapMode = TextureWrapMode.Clamp;
 
-			foreach (var r in new RenderTexture[] { v, u0, u1}) {
-				using (new RenderTextureActivator(r)) {
-					clear.Int(r);
-				}
-			}
+			foreach (var r in new RenderTexture[] { v, u0, u1})
+				clear.Float(r);
+			clear.Int(b);
 
 			wave.C = speed;
 			wave.H = 1000f / v.width;
@@ -99,9 +103,9 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 			time += Time.deltaTime;
 			while (time >= dt) {
 				time -= dt;
-				wave.Next(u1, u0, v, dt);
+				wave.Next(u1, u0, v, b, dt);
 				Swap();
-				wave.Clamp(u1, u0, v);
+				wave.Clamp(u1, u0, v, b);
 				Swap();
 			}
 		}
