@@ -8,7 +8,7 @@ RWTexture2D<float> _FloatTex;
 RWTexture2D<int> _IntTex;
 
 float _FloatClearValue;
-float _IntClearValue;
+int _IntClearValue;
 
 
 
