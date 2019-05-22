@@ -106,8 +106,8 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 			if (col.Raycast(ray, out hit, float.MaxValue)) {
 				var uv = hit.textureCoord;
 				uv.y = 0.5f;
-				Debug.LogFormat("Click on uv={0}", uv);
-				stamp.Draw(u0, uv, 0.1f * Vector2.one);
+				var w = 2f * Mathf.PI * Time.time;
+				stamp.Draw(u0, uv, 0.02f * Vector2.one, 0.1f * Mathf.Sin(w));
 			}
 		}
 

@@ -68,7 +68,7 @@ namespace WaterSimulationForGamesSystem {
 
 		#region member
 		private Vector4 Params(float dt = 1f) {
-			return new Vector4(C * C, 1f / (H * H), dt, MaxSlope * H);
+			return new Vector4(C * C / (H * H), H, dt, MaxSlope * H);
 		}
 		#endregion
 	}
