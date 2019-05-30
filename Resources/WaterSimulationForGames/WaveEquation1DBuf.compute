@@ -10,7 +10,7 @@ RWStructuredBuffer<float> _V;
 StructuredBuffer<float> _U0;
 RWStructuredBuffer<float> _U1;
 
-float4 _Params; // c^2, 1/h^2, dt, maxSlope * h
+float4 _Params; // c^2, 1/Dxy^2, dt, maxSlope * h
 
 
 

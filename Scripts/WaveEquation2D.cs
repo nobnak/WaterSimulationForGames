@@ -28,12 +28,12 @@ namespace WaterSimulationForGamesSystem {
 			K_CLAMP = cs.FindKernel("Clamp");
 
 			C = 1f;
-			H = 1f;
+			Dxy = 1f;
 			MaxSlope = 1f;
 		}
 
 		public float C { get ; set; }
-		public float H { get; set; }
+		public float Dxy { get; set; }
 		public float MaxSlope { get; set; }
 		public void Next(RenderTexture u1, Texture u0, RenderTexture v, RenderTexture b, float dt) {
 			var size = new Vector3Int(v.width, v.height, 1);
@@ -59,7 +59,7 @@ namespace WaterSimulationForGamesSystem {
 			cs.Dispatch(K_CLAMP, cap.x, cap.y, cap.z);
 		}
 		public float SupDt() {
-			return H / C;
+			return Dxy / C;
 		}
 		public Vector3Int DispatchSize(Vector3Int size) {
 			return cs.DispatchSize(K_NEXT, size);
@@ -76,7 +76,7 @@ namespace WaterSimulationForGamesSystem {
 
 		#region member
 		private Vector4 Params(float dt = 1f) {
-			return new Vector4(C * C / (H * H), H, dt, MaxSlope * H);
+			return new Vector4(C * C / (Dxy * Dxy), Dxy, dt, MaxSlope * Dxy);
 		}
 		#endregion
 	}

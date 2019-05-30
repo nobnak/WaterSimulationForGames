@@ -1,0 +1,20 @@
+﻿#pragma kernel Generate
+
+int2 _Count;
+Texture2D<float> _Height;
+RWTexture2D<float4> _Normal;
+
+float4 _Params; // Dxy, 0, 0, 0
+
+
+
+[numthreads(8,8,1)]
+void Generate (uint3 id : SV_DispatchThreadID) {
+	int4 i = id.xyxy + int4(0, 0, 1, 1);
+	i -= (i.zwzw < _Count.xyxy) ? 0 : 1;
+
+	float2 dz = float2(_Height[i.zy], _Height[i.xw]) - _Height[id.xy];
+	float3 n = normalize(float3(-dz, -_Params.x));
+	_Normal[id.xy] = float4(n, 1);
+}
+

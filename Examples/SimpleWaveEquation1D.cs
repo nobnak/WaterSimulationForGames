@@ -11,6 +11,8 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 	[SerializeField]
 	protected float speed = 1f;
 	[SerializeField]
+	protected float size = 1000f;
+	[SerializeField]
 	protected float maxSlope = 1f;
 	[SerializeField]
 	protected int count = 100;
@@ -23,7 +25,7 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 	protected Stamp stamp;
 	protected Clear clear;
 	protected Uploader uploader;
-	protected WaveEquation1D we;
+	protected WaveEquation1D wave;
 	protected BarGraph graph;
 	protected Renderer rend;
 	protected Collider col;
@@ -37,7 +39,7 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 
 	#region unity
 	private void OnEnable() {
-		we = new WaveEquation1D();
+		wave = new WaveEquation1D();
 		graph = new BarGraph();
 		stamp = new Stamp();
 		clear = new Clear();
@@ -76,20 +78,20 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 				bs[i] = ((i % mod) == 0) ? 1 : 0;
 			uploader.Upload(b, bs);
 
-			we.C = speed;
-			we.H = 1000f / count;
-			we.MaxSlope = maxSlope;
+			wave.C = speed;
+			wave.Dxy = size / count;
+			wave.MaxSlope = maxSlope;
 
 			graph.Peak = maxSlope * 2;
 
 			time = 0f;
-			dt = Mathf.Min(we.SupDt(), 0.1f) / (2 * quality);
+			dt = Mathf.Min(wave.SupDt(), 0.1f) / (2 * quality);
 			Debug.LogFormat("Set dt={0} for speed={1}", dt, speed);
 		};
 	}
 
 	private void OnDisable() {
-		we.Dispose();
+		wave.Dispose();
 		stamp.Dispose();
 		clear.Dispose();
 		ReleaseBuffers();
@@ -115,9 +117,9 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 			time += Time.deltaTime;
 			while (time >= dt) {
 				time -= dt;
-				we.Next(u1, u0, v, b, dt);
+				wave.Next(u1, u0, v, b, dt);
 				Swap();
-				we.Clamp(u1, u0, v, b);
+				wave.Clamp(u1, u0, v, b);
 				Swap();
 			}
 		}

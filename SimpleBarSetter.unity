@@ -144,8 +144,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7474df501b52fdd479a2b4f8121df60f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 100
-  maxSlope: 10
+  speed: 1
+  size: 10
+  maxSlope: 2
   count: 100
   quality: 1
   update: 1
@@ -813,11 +814,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf8cf58a65747f94c8f24a5d6900a3ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 100
+  texfilter: 1
+  outputMode: 2
+  aspect: 0.1
+  normalScale: 1
+  speed: 50
   maxSlope: 10
-  count: 1000
+  count: 500
   quality: 1
   update: 1
+  boundary: {fileID: 2800000, guid: 3ac3a24d208c6a7478a0027c9d79e325, type: 3}
+  outputs:
+  - {fileID: 2100000, guid: 471e48b4b64becb4ca07e60d5ea43846, type: 2}
+  - {fileID: 2100000, guid: ae3511e2acbdaf1448b09c7ae3ab04b1, type: 2}
+  - {fileID: 2100000, guid: cb5a773bf00c14e44a2c92c6b1206533, type: 2}
 --- !u!23 &1623212703
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -835,7 +845,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 471e48b4b64becb4ca07e60d5ea43846, type: 2}
+  - {fileID: 2100000, guid: ae3511e2acbdaf1448b09c7ae3ab04b1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
