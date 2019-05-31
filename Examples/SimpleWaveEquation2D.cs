@@ -88,11 +88,11 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 			u0 = new RenderTexture(v.descriptor);
 			u1 = new RenderTexture(v.descriptor);
 			b = new RenderTexture(countQuant.x, countQuant.y, 0, formati) { enableRandomWrite = true };
-			n = new RenderTexture(countQuant.x, countQuant.y, 0, RenderTextureFormat.ARGBHalf) {
+			n = new RenderTexture(countQuant.x, countQuant.y, 0, RenderTextureFormat.ARGBFloat) {
 				enableRandomWrite = true,
 			};
-			tmp0 = new RenderTexture(n.descriptor) { enableRandomWrite = true };
-			tmp1 = new RenderTexture(n.descriptor) { enableRandomWrite = true };
+			tmp0 = new RenderTexture(countQuant.x, countQuant.y, 0, RenderTextureFormat.ARGBFloat) { enableRandomWrite = true };
+			tmp1 = new RenderTexture(tmp0.descriptor) { enableRandomWrite = true };
 			c = new RenderTexture(v.descriptor) { enableRandomWrite = true };
 			v.Create();
 			u0.Create();
