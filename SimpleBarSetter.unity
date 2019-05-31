@@ -815,9 +815,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   texfilter: 1
-  outputMode: 2
+  outputMode: 3
+  lightDir: {x: 0, y: 0, z: -1}
   aspect: 0.1
   normalScale: 1
+  refractiveIndex: 1.33
   speed: 50
   maxSlope: 10
   count: 500
@@ -828,6 +830,9 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 471e48b4b64becb4ca07e60d5ea43846, type: 2}
   - {fileID: 2100000, guid: ae3511e2acbdaf1448b09c7ae3ab04b1, type: 2}
   - {fileID: 2100000, guid: cb5a773bf00c14e44a2c92c6b1206533, type: 2}
+  - {fileID: 2100000, guid: a3b30dc8177316540aa3c0636c7100c8, type: 2}
+  - {fileID: 2100000, guid: a9fe34cba19f8d643aa6c325322b23e7, type: 2}
+  - {fileID: 2100000, guid: 5ff826290fee46a449af25ee81f50961, type: 2}
 --- !u!23 &1623212703
 MeshRenderer:
   m_ObjectHideFlags: 0

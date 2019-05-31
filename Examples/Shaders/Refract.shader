@@ -1,14 +1,10 @@
-﻿Shader "Unlit/Water" {
+﻿Shader "Unlit/Refract" {
     Properties {
         _MainTex ("Texture", 2D) = "black" {}
 		_NormalTex ("Normal", 2D) = "black" {}
 		_ViewDir ("View dir", Vector) = (0, 0, -1, 0)
 		_Refractive ("Refractive index", Float) = 1.33
 		_Aspect ("Aspect (H/W)", Float) = 1
-
-		_CausticsTex ("Caustics", 2D) = "black" {}
-		_CausticsGain ("Caustics Gain", Float) = 0.1
-		_CausticsAmbience ("Ambient", Range(0, 1)) = 0
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -36,10 +32,6 @@
 			sampler2D _NormalTex;
 			float4 _NormalTex_TexelSize;
 
-			sampler2D _CausticsTex;
-			float _CausticsGain;
-			float _CausticsAmbience;
-
 			float4 _ViewDir;
 			float _Refractive;
 			float _Aspect;
@@ -57,8 +49,7 @@
 				float2 uv = i.uv + (_Aspect / abs(refrDir.z)) * refrDir.xy;
 
                 float4 cmain = tex2D(_MainTex, uv);
-				float intensity = tex2D(_CausticsTex, uv) * _CausticsGain;
-				return cmain * lerp(intensity, 1, _CausticsAmbience);
+				return cmain;
             }
             ENDCG
         }

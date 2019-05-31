@@ -1,9 +1,5 @@
 using nobnak.Gist;
-using nobnak.Gist.Extensions.GPUExt;
-using nobnak.Gist.GPUBuffer;
 using nobnak.Gist.ObjectExt;
-using nobnak.Gist.Scoped;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using WaterSimulationForGamesSystem;
@@ -11,17 +7,24 @@ using WaterSimulationForGamesSystem;
 public class SimpleWaveEquation2D : MonoBehaviour {
 	public static readonly int P_NORMAL_TEX = Shader.PropertyToID("_NormalTex");
 	public static readonly int P_ASPECT = Shader.PropertyToID("_Aspect");
+	public static readonly int P_CAUSTICS_TEX = Shader.PropertyToID("_CausticsTex");
+	public static readonly int P_REFRACTIVE = Shader.PropertyToID("_Refractive");
 
-	public enum OutputMode { Height = 0, Normal, Refract }
+	public enum OutputMode { Height = 0, Normal, Refract, Caustics_Scan, Caustics, Water }
 	[SerializeField]
 	protected FilterMode texfilter = FilterMode.Point;
 	[SerializeField]
 	protected OutputMode outputMode;
 
 	[SerializeField]
+	protected Vector3 lightDir = new Vector3(0f, 0f, -1f);
+
+	[SerializeField]
 	protected float aspect = 0.1f;
 	[SerializeField]
 	protected float normalScale = 1f;
+	[SerializeField]
+	protected float refractiveIndex = 1.33f;
 	[SerializeField]
 	protected float speed = 100f;
 	[SerializeField]
@@ -41,13 +44,17 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 
 	protected Stamp stamp;
 	protected Clear clear;
+	protected Caustics caustics;
 	protected Normal2D normal;
 	protected Uploader uploader;
 	protected WaveEquation2D wave;
 	protected RenderTexture v;
 	protected RenderTexture u0, u1;
 	protected RenderTexture b;
+
 	protected RenderTexture n;
+
+	protected RenderTexture c, tmp0, tmp1;
 
 	protected Validator validator = new Validator();
 	protected Renderer rend;
@@ -60,6 +67,7 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 		stamp = new Stamp();
 		clear = new Clear();
 		normal = new Normal2D();
+		caustics = new Caustics();
 		uploader = new Uploader();
 		wave = new WaveEquation2D();
 
@@ -79,20 +87,24 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 			};
 			u0 = new RenderTexture(v.descriptor);
 			u1 = new RenderTexture(v.descriptor);
-			b = new RenderTexture(countQuant.x, countQuant.y, 0, formati) {
-				enableRandomWrite = true,
-			};
+			b = new RenderTexture(countQuant.x, countQuant.y, 0, formati) { enableRandomWrite = true };
 			n = new RenderTexture(countQuant.x, countQuant.y, 0, RenderTextureFormat.ARGBHalf) {
 				enableRandomWrite = true,
 			};
+			tmp0 = new RenderTexture(n.descriptor) { enableRandomWrite = true };
+			tmp1 = new RenderTexture(n.descriptor) { enableRandomWrite = true };
+			c = new RenderTexture(v.descriptor) { enableRandomWrite = true };
 			v.Create();
 			u0.Create();
 			u1.Create();
 			n.Create();
 			b.Create();
+			tmp0.Create();
+			tmp1.Create();
+			c.Create();
 
-			v.filterMode = u0.filterMode = u1.filterMode = n.filterMode = texfilter;
-			v.wrapMode = u0.wrapMode = u1.wrapMode = n.wrapMode = TextureWrapMode.Clamp;
+			v.filterMode = u0.filterMode = u1.filterMode = n.filterMode = c.filterMode = texfilter;
+			v.wrapMode = u0.wrapMode = u1.wrapMode = n.wrapMode = c.wrapMode = tmp0.wrapMode = tmp1.wrapMode = TextureWrapMode.Clamp;
 
 			foreach (var r in new RenderTexture[] { v, u0, u1})
 				clear.Float(r);
@@ -121,6 +133,7 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 		clear.Dispose();
 		stamp.Dispose();
 		normal.Dispose();
+		caustics.Dispose();
 		uploader.Dispose();
 		ReleaseTextures();
 	}
@@ -133,6 +146,10 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 
 		normal.Dxy = normalScale * wave.Dxy;
 		dt = Mathf.Min(wave.SupDt(), 0.1f) / (2 * quality);
+
+		caustics.Refractive = 1.33f;
+		caustics.Aspect = aspect;
+		caustics.LightDir = lightDir;
 
 		if (Input.GetMouseButton(0)) {
 			var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -155,6 +172,8 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 			}
 
 			normal.Generate(n, u0);
+
+			caustics.Generate(c, n, tmp0, tmp1);
 		}
 
 		var ioutput = (int)outputMode;
@@ -170,6 +189,20 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 				case OutputMode.Refract:
 					mat.SetTexture(P_NORMAL_TEX, n);
 					mat.SetFloat(P_ASPECT, aspect);
+					mat.SetFloat(P_REFRACTIVE, refractiveIndex);
+					break;
+				case OutputMode.Caustics_Scan:
+					mat.SetTexture("_Tmp0", tmp0);
+					mat.SetTexture("_Tmp1", tmp1);
+					break;
+				case OutputMode.Caustics:
+					mat.mainTexture = c;
+					break;
+				case OutputMode.Water:
+					mat.SetTexture(P_NORMAL_TEX, n);
+					mat.SetTexture(P_CAUSTICS_TEX, c);
+					mat.SetFloat(P_ASPECT, aspect);
+					mat.SetFloat(P_REFRACTIVE, refractiveIndex);
 					break;
 			}
 			rend.sharedMaterial = mat;
@@ -182,6 +215,13 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 		v.DestroySelf();
 		u0.DestroySelf();
 		u1.DestroySelf();
+
+		b.DestroySelf();
+		n.DestroySelf();
+
+		tmp0.DestroySelf();
+		tmp1.DestroySelf();
+		c.DestroySelf();
 	}
 	private void Swap() {
 		var tmp = u1;
