@@ -17,6 +17,8 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 	[SerializeField]
 	protected int count = 100;
 	[SerializeField]
+	protected float intakePower = 1f;
+	[SerializeField]
 	[Range(1, 10)]
 	protected int quality = 1;
 	[SerializeField]
@@ -109,7 +111,8 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 				var uv = hit.textureCoord;
 				uv.y = 0.5f;
 				var w = 2f * Mathf.PI * Time.time;
-				stamp.Draw(u0, uv, 0.02f * Vector2.one, 0.1f * Mathf.Sin(w));
+				var power = intakePower;
+				stamp.Draw(u0, uv, 0.02f * Vector2.one, power);
 			}
 		}
 

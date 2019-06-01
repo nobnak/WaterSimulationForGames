@@ -33,8 +33,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Aspect: 0.1
-    - _CausticsAmbience: 0.55
-    - _CausticsGain: 2.24
+    - _CausticsAmbience: 0.25
+    - _CausticsGain: 1.18
     - _Refractive: 1.33
     m_Colors:
     - _CausticsColor: {r: 1, g: 1, b: 1, a: 1}

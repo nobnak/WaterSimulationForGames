@@ -148,6 +148,7 @@ MonoBehaviour:
   size: 10
   maxSlope: 2
   count: 100
+  intakePower: 1
   quality: 1
   update: 1
 --- !u!23 &113893183
@@ -815,7 +816,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   texfilter: 1
-  outputMode: 3
+  outputMode: 2
   lightDir: {x: 0, y: 0, z: -1}
   aspect: 0.1
   normalScale: 1
@@ -823,6 +824,7 @@ MonoBehaviour:
   speed: 50
   maxSlope: 10
   count: 500
+  intakePower: 100
   quality: 1
   update: 1
   boundary: {fileID: 2800000, guid: 3ac3a24d208c6a7478a0027c9d79e325, type: 3}

@@ -1,6 +1,7 @@
 ﻿Shader "Unlit/Normal" {
     Properties {
         _MainTex ("Texture", 2D) = "black" {}
+		_Gain ("Gain", Float) = 1
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -25,6 +26,8 @@
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
+			float _Gain;
+
             v2f vert (appdata v) {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
@@ -34,7 +37,7 @@
 
             float4 frag (v2f i) : SV_Target {
                 float3 n = tex2D(_MainTex, i.uv).xyz;
-				return float4(0.5 * (n + 1), 1);
+				return float4(0.5 * (_Gain * n + 1), 1);
             }
             ENDCG
         }

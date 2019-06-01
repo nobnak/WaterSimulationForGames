@@ -17,7 +17,7 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 	protected OutputMode outputMode;
 
 	[SerializeField]
-	protected Vector3 lightDir = new Vector3(0f, 0f, -1f);
+	protected Vector3 lightDir = new Vector3(0f, 0f, 1f);
 
 	[SerializeField]
 	protected float aspect = 0.1f;
@@ -31,6 +31,8 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 	protected float maxSlope = 1f;
 	[SerializeField]
 	protected int count = 100;
+	[SerializeField]
+	protected float intakePower = 1f;
 	[Range(1, 10)]
 	[SerializeField]
 	protected int quality = 1;
@@ -156,8 +158,9 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 			RaycastHit hit;
 			if (col.Raycast(ray, out hit, float.MaxValue)) {
 				var uv = hit.textureCoord;
-				var w = 3f * (2f * Mathf.PI) * Time.time;
-				stamp.Draw(u0, uv, 1e-2f * Vector2.one, Mathf.Sin(w));
+				var w = 1f * (2f * Mathf.PI) * Time.time;
+				var power = intakePower * Mathf.Sin(w) * Time.deltaTime;
+				stamp.Draw(u0, uv, 1e-2f * Vector2.one, power);
 			}
 		}
 
