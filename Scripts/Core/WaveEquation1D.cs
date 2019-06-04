@@ -3,13 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace WaterSimulationForGamesSystem {
+namespace WaterSimulationForGamesSystem.Core {
 
-	public class WaveEquation1DBuf : System.IDisposable {
+	public class WaveEquation1D : System.IDisposable {
 
-		public const string PATH = "WaterSimulationForGames/WaveEquation1DBuf";
+		public const string PATH = "WaterSimulationForGames/WaveEquation1D";
 
 		public readonly static int P_COUNT = Shader.PropertyToID("_Count");
+		public readonly static int P_B = Shader.PropertyToID("_B");
 		public readonly static int P_V = Shader.PropertyToID("_V");
 		public readonly static int P_U0 = Shader.PropertyToID("_U0");
 		public readonly static int P_U1 = Shader.PropertyToID("_U1");
@@ -21,38 +22,42 @@ namespace WaterSimulationForGamesSystem {
 		protected ComputeShader cs;
 
 		#region interface
-		public WaveEquation1DBuf() {
+		public WaveEquation1D() {
 			cs = Resources.Load<ComputeShader>(PATH);
 			K_NEXT = cs.FindKernel("Next");
 			K_CLAMP = cs.FindKernel("Clamp");
 
 			C = 1f;
-			H = 1f;
+			Dxy = 1f;
 			MaxSlope = 1f;
 		}
 
 		public float C { get ; set; }
-		public float H { get; set; }
+		public float Dxy { get; set; }
 		public float MaxSlope { get; set; }
-		public void Next(ComputeBuffer u1, ComputeBuffer u0, ComputeBuffer v, int count, float dt) {
-			var cap = cs.DispatchSize(K_NEXT, new Vector3Int(count, 1, 1));
-			cs.SetInt(P_COUNT, count);
+		public void Next(RenderTexture u1, Texture u0, RenderTexture v, RenderTexture b, float dt) {
+			var cap = cs.DispatchSize(K_NEXT, new Vector3Int(u1.width, 1, 1));
+			cs.SetInt(P_COUNT, u1.width);
 			cs.SetVector(P_Params, Params(dt));
-			cs.SetBuffer(K_NEXT, P_V, v);
-			cs.SetBuffer(K_NEXT, P_U0, u0);
-			cs.SetBuffer(K_NEXT, P_U1, u1);
+			cs.SetTexture(K_NEXT, P_B, b);
+			cs.SetTexture(K_NEXT, P_V, v);
+			cs.SetTexture(K_NEXT, P_U0, u0);
+			cs.SetTexture(K_NEXT, P_U1, u1);
 			cs.Dispatch(K_NEXT, cap.x, cap.y, cap.z);
 		}
-		public void Clamp(ComputeBuffer u1, ComputeBuffer u0, int count) {
-			var cap = cs.DispatchSize(K_CLAMP, new Vector3Int(count, 1, 1));
-			cs.SetInt(P_COUNT, count);
+		public void Clamp(RenderTexture u1, Texture u0, RenderTexture v, RenderTexture b) {
+			var cap = cs.DispatchSize(K_CLAMP, new Vector3Int(u1.width, 1, 1));
+			cs.SetInt(P_COUNT, u1.width);
 			cs.SetVector(P_Params, Params());
-			cs.SetBuffer(K_CLAMP, P_U0, u0);
-			cs.SetBuffer(K_CLAMP, P_U1, u1);
+			cs.SetTexture(K_CLAMP, P_B, b);
+			cs.SetTexture(K_CLAMP, P_V, v);
+			cs.SetTexture(K_CLAMP, P_U0, u0);
+			cs.SetTexture(K_CLAMP, P_U1, u1);
 			cs.Dispatch(K_CLAMP, cap.x, cap.y, cap.z);
 		}
+
 		public float SupDt() {
-			return H / C;
+			return Dxy / C;
 		}
 		#region IDisposable
 		public void Dispose() {
@@ -63,7 +68,7 @@ namespace WaterSimulationForGamesSystem {
 
 		#region member
 		private Vector4 Params(float dt = 1f) {
-			return new Vector4(C * C, 1f / (H * H), dt, MaxSlope * H);
+			return new Vector4(C * C / (Dxy * Dxy), Dxy, dt, MaxSlope * Dxy);
 		}
 		#endregion
 	}

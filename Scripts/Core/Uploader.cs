@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-namespace WaterSimulationForGamesSystem {
+namespace WaterSimulationForGamesSystem.Core {
 
 	public class Uploader : System.IDisposable {
 

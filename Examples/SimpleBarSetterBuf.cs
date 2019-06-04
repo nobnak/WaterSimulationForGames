@@ -1,9 +1,8 @@
 using nobnak.Gist.Extensions.Array;
 using nobnak.Gist.GPUBuffer;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using WaterSimulationForGamesSystem.Core;
 
 namespace WaterSimulationForGamesSystem.Examples {
 

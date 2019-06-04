@@ -1,6 +1,7 @@
 using nobnak.Gist.ObjectExt;
 using UnityEngine;
 using WaterSimulationForGamesSystem;
+using WaterSimulationForGamesSystem.Core;
 
 public class SimpleIntTex : MonoBehaviour {
 

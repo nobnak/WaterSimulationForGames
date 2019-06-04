@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace WaterSimulationForGamesSystem {
+namespace WaterSimulationForGamesSystem.Core {
 
 	public class Clear : System.IDisposable {
 

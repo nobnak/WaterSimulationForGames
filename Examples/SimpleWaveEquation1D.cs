@@ -1,11 +1,7 @@
 using nobnak.Gist;
-using nobnak.Gist.GPUBuffer;
 using nobnak.Gist.ObjectExt;
-using nobnak.Gist.Scoped;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using WaterSimulationForGamesSystem;
+using WaterSimulationForGamesSystem.Core;
 
 public class SimpleWaveEquation1D : MonoBehaviour {
 	[SerializeField]
