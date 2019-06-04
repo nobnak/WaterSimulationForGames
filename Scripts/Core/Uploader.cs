@@ -51,8 +51,6 @@ namespace WaterSimulationForGamesSystem.Core {
 				cs.SetBuffer(K_UPLOAD_INT, P_INT_VALUES, buf);
 				cs.SetTexture(K_UPLOAD_INT, P_INT_TEX, tex);
 				cs.Dispatch(K_UPLOAD_INT, cap.x, cap.y, cap.z);
-
-				Debug.LogFormat("Dispatch size : {0}", cap);
 			}
 		}
 

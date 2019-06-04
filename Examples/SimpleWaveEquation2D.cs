@@ -41,18 +41,15 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 
 		validator.Reset();
 		validator.Validation += () => {
-			wave.SetSize(data.count, data.count);
+			var c = Camera.main;
+			var reqSize = new Vector2Int(c.pixelWidth >> data.lod, c.pixelHeight >> data.lod);
+			wave.SetSize(reqSize.y, reqSize.y);
 			wave.SetBoundary(data.boundary);
-
-			var size = wave.Size;
-			wave.SetParams(
-				data.lightDir,
-				data.height,
-				data.normalScale,
-				data.refractiveIndex,
-				data.speed,
-				data.maxSlope);
+			wave.Params = data.paramset;
 		};
+	}
+	private void OnValidate() {
+		validator.Invalidate();
 	}
 	private void OnDisable() {
 		wave.Dispose();
@@ -88,8 +85,8 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 					break;
 				case OutputMode.Refract:
 					mat.SetTexture(P_NORMAL_TEX, wave.N);
-					mat.SetFloat(P_ASPECT, data.height);
-					mat.SetFloat(P_REFRACTIVE, data.refractiveIndex);
+					mat.SetFloat(P_ASPECT, data.paramset.height);
+					mat.SetFloat(P_REFRACTIVE, data.paramset.refractiveIndex);
 					break;
 				case OutputMode.Caustics:
 					mat.mainTexture = wave.C;
@@ -97,8 +94,8 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 				case OutputMode.Water:
 					mat.SetTexture(P_NORMAL_TEX,  wave.N);
 					mat.SetTexture(P_CAUSTICS_TEX, wave.C);
-					mat.SetFloat(P_ASPECT, data.height);
-					mat.SetFloat(P_REFRACTIVE, data.refractiveIndex);
+					mat.SetFloat(P_ASPECT, data.paramset.height);
+					mat.SetFloat(P_REFRACTIVE, data.paramset.refractiveIndex);
 					break;
 			}
 			rend.sharedMaterial = mat;
@@ -113,19 +110,11 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 	[System.Serializable]
 	public class Data {
 		public FilterMode texfilter = FilterMode.Bilinear;
-		public Vector3 lightDir = new Vector3(0f, 0f, -1f);
-
-		[Header("Height (water height / field width)")]
-		public float height = 0.1f;
-		public float normalScale = 1f;
-		public float refractiveIndex = 1.33f;
-		public float speed = 50f;
-		public float maxSlope = 10f;
-		public int count = 500;
-		public float intakePower = 1000f;
-		[Range(1, 10)]
-		public int quality = 1;
 		public Texture2D boundary;
+		public float intakePower = 1000f;
+		[Range(0, 4)]
+		public int lod = 1;
+		public Wave2D.ParamPack paramset = Wave2D.ParamPack.CreateDefault();
 	}
 	#endregion
 }

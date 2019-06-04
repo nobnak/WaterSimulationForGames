@@ -29,16 +29,15 @@ namespace WaterSimulationForGamesSystem.Core {
 
 			C = 1f;
 			Dxy = 1f;
-			MaxSlope = 1f;
 		}
 
 		public float C { get ; set; }
 		public float Dxy { get; set; }
-		public float MaxSlope { get; set; }
-		public void Next(RenderTexture u1, Texture u0, RenderTexture v, RenderTexture b, float dt) {
+		public float Dt { get; set; }
+		public void Next(RenderTexture u1, Texture u0, RenderTexture v, RenderTexture b) {
 			var size = new Vector3Int(v.width, v.height, 1);
 			cs.SetInts(P_COUNT, size.x, size.y);
-			cs.SetVector(P_Params, Params(dt));
+			cs.SetVector(P_Params, Params());
 			cs.SetTexture(K_NEXT, P_B, b);
 			cs.SetTexture(K_NEXT, P_V, v);
 			cs.SetTexture(K_NEXT, P_U0, u0);
@@ -77,8 +76,8 @@ namespace WaterSimulationForGamesSystem.Core {
 		#endregion
 
 		#region member
-		private Vector4 Params(float dt = 1f) {
-			return new Vector4(C * C / (Dxy * Dxy), Dxy, dt, MaxSlope * Dxy);
+		private Vector4 Params() {
+			return new Vector4(C * C / (Dxy * Dxy), Dxy, Dt, 0f);
 		}
 		#endregion
 	}

@@ -11,7 +11,7 @@ RWTexture2D<float> _V;
 Texture2D<float> _U0;
 RWTexture2D<float> _U1;
 
-float4 _Params; // c^2/Dxy^2, Dxy, dt, maxSlope * Dxy
+float4 _Params; // c^2/Dxy^2, Dxy, dt, 0
 
 
 
@@ -45,8 +45,8 @@ void Clamp(uint3 id : SV_DispatchThreadID) {
 	float u = _U0[c];
 	float v = _V[c];
 
-	float dl = saturate(1e-3 * _Params.y * _Params.z);
-	v= lerp(v, 0, dl);
+	float dl = saturate(1e-1 * _Params.y * _Params.z);
+	v = lerp(v, 0, dl);
 	u = lerp(u, 0, dl);
 
 	_V[c] = v;

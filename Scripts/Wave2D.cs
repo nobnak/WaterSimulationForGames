@@ -14,14 +14,8 @@ namespace WaterSimulationForGamesSystem {
 
 		protected FilterMode texfilter = FilterMode.Bilinear;
 
-		protected Vector2Int size = new Vector2Int(100, 100);
-		// Depth Scale (water height / field width)
-		protected Vector3 lightDir = new Vector3(0f, 0f, -1f);
-		protected float height = 0.1f;
-		protected float normalScale = 1f;
-		protected float refractiveIndex = 1.33f;
-		protected float speed = 50f;
-		protected float maxSlope = 10f;
+		protected Vector2Int size = Vector2Int.zero;
+		protected ParamPack pd;
 
 		protected Stamp stamp;
 		protected Clear clear;
@@ -64,56 +58,11 @@ namespace WaterSimulationForGamesSystem {
 		public RenderTexture N { get { return n; } }
 		public RenderTexture C { get { return c; } }
 
-		public Vector3 LightDir {
-			get { return lightDir; }
+		public ParamPack Params {
+			get { return pd; }
 			set {
-				if (lightDir != value) {
-					lightDir = value.normalized;
-					validator.Invalidate();
-				}
-			}
-		}
-		public float Height {
-			get { return height; }
-			set {
-				if (value > 0) {
-					height = value;
-					validator.Invalidate();
-				}
-			}
-		}
-		public float NormalScale {
-			get { return normalScale; }
-			set {
-				if (normalScale != value) {
-					normalScale = value;
-					validator.Invalidate();
-				}
-			}
-		}
-		public float RefractiveIndex {
-			get { return refractiveIndex; }
-			set {
-				if (refractiveIndex != value) {
-					refractiveIndex = value;
-					validator.Invalidate();
-				}
-			}
-		}
-		public float Speed {
-			get { return speed; }
-			set {
-				if (speed != value) {
-					speed = value;
-					validator.Invalidate();
-				}
-			}
-		}
-		public float MaxSlope {
-			get { return maxSlope; }
-			set {
-				if (maxSlope != value) {
-					maxSlope = value;
+				if (pd != value) {
+					pd = value;
 					validator.Invalidate();
 				}
 			}
@@ -130,27 +79,22 @@ namespace WaterSimulationForGamesSystem {
 
 			validator.Reset();
 			validator.Validation += () => {
-
-				if (u0 == null || u0.width != size.x || u0.height != size.y) {
-					ReleaseTextures();
-					CreateTextures();
-					ClearTextures();
-				}
-
 				time = 0f;
 
-				wave.C = speed;
-				wave.Dxy = 1e3f / size.x;
-				wave.MaxSlope = maxSlope;
+				wave.C = pd.speed;
+				wave.Dxy = 1e3f / size.y;
+				dt = Mathf.Min(wave.SupDt(), 0.1f) / (2f * pd.quality);
+				wave.Dt = dt;
+				Debug.LogFormat("Set dt={0}", dt);
+				if (dt < 1e-3f)
+					throw new System.InvalidOperationException(string.Format("dt={0} is too small", dt));
 
-				normal.Dxy = normalScale * wave.Dxy;
+				normal.Dxy = pd.normalScale * wave.Dxy;
 
-				var quality = 1;
-				dt = Mathf.Min(wave.SupDt(), 0.1f) / (2f * quality);
 
-				caustics.Refractive = refractiveIndex;
-				caustics.Aspect = height;
-				caustics.LightDir = lightDir;
+				caustics.Refractive = pd.refractiveIndex;
+				caustics.Aspect = pd.height;
+				caustics.LightDir = pd.lightDir;
 			};
 		}
 
@@ -184,23 +128,12 @@ namespace WaterSimulationForGamesSystem {
 			if (size != sizeNext) {
 				validator.Invalidate();
 				size = sizeNext;
-			}
-		}
-		public void SetParams(
-			Vector3 lightDir,
-			float height,
-			float normalScale,
-			float refractiveIndex,
-			float speed,
-			float maxSlope) {
+				Debug.LogFormat("{0}: Set texture size={1}", GetType().Name, size);
 
-			validator.Invalidate();
-			this.lightDir = lightDir;
-			this.height = height;
-			this.normalScale = normalScale;
-			this.refractiveIndex = refractiveIndex;
-			this.speed = speed;
-			this.maxSlope = maxSlope;
+				ReleaseTextures();
+				CreateTextures();
+				ClearTextures();
+			}
 		}
 
 		public void Update() {
@@ -209,7 +142,7 @@ namespace WaterSimulationForGamesSystem {
 			time += Time.deltaTime;
 			while (time >= dt) {
 				time -= dt;
-				wave.Next(u1, u0, v, b, dt);
+				wave.Next(u1, u0, v, b);
 				Swap();
 				wave.Clamp(u1, u0, v, b);
 				Swap();
@@ -272,6 +205,65 @@ namespace WaterSimulationForGamesSystem {
 			var tmp = u1;
 			u1 = u0;
 			u0 = tmp;
+		}
+		#endregion
+
+		#region definitions
+		[System.Serializable]
+		public struct ParamPack : System.IEquatable<ParamPack> {
+			public Vector3 lightDir;
+			[Header("Depth-Field aspect (water height / field width)")]
+			public float height;
+			public float normalScale;
+			public float refractiveIndex;
+			public float speed;
+			public int quality;
+
+			#region static
+			public static ParamPack CreateDefault() {
+				return new ParamPack() {
+					lightDir = new Vector3(0f, 0f, -1f),
+					height = 0.1f,
+					normalScale = 1f,
+					refractiveIndex = 1.33f,
+					speed = 50f,
+					quality = 1,
+				};
+			}
+			public static bool operator ==(ParamPack a, ParamPack b) {
+				return a.Equals(b);
+			}
+			public static bool operator !=(ParamPack a, ParamPack b) {
+				return !a.Equals(b);
+			}
+			#endregion
+
+			#region IEquatable
+			public bool Equals(ParamPack o) {
+				return lightDir == o.lightDir
+					&& height == o.height
+					&& normalScale == o.normalScale
+					&& refractiveIndex == o.refractiveIndex
+					&& speed == o.speed
+					&& quality == o.quality;
+			}
+			#endregion
+
+			#region Object
+			public override bool Equals(object obj) {
+				return (obj is ParamPack) && Equals((ParamPack)obj);
+			}
+			public override int GetHashCode() {
+				var v = 4049;
+				v = (v + lightDir.GetHashCode()) * 2801;
+				v = (v + height.GetHashCode()) * 2801;
+				v = (v + normalScale.GetHashCode()) * 2801;
+				v = (v + refractiveIndex.GetHashCode()) * 2801;
+				v = (v + speed.GetHashCode()) * 2801;
+				v = (v + quality.GetHashCode()) * 2801;
+				return v;
+			}
+			#endregion
 		}
 		#endregion
 	}
