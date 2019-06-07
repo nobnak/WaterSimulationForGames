@@ -24,7 +24,7 @@ namespace WaterSimulationForGamesSystem.Core {
 		public ComputeShader cs { get; protected set; }
 
 		protected Vector3 lightDir;
-		public float Aspect { get; set; }
+		public Vector2 DepthFieldAspect { get; set; }
 		public float Refractive { get; set; }
 
 		public Caustics() {
@@ -33,7 +33,7 @@ namespace WaterSimulationForGamesSystem.Core {
 			K_ACCUMULATE = cs.FindKernel("Accumulate");
 
 			LightDir = Vector3.down;
-			Aspect = 1f;
+			DepthFieldAspect = new Vector2(0.1f, 0.1f);
 			Refractive = 1.33f;
 		}
 
@@ -81,7 +81,7 @@ namespace WaterSimulationForGamesSystem.Core {
 		}
 
 		private Vector4 GetParams() {
-			return new Vector4(Aspect, Refractive, 0f, 0f);
+			return new Vector4(DepthFieldAspect.x, DepthFieldAspect.y, Refractive, 0f);
 		}
 		#endregion
 	}

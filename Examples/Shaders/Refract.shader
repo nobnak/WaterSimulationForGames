@@ -3,8 +3,7 @@
         _MainTex ("Texture", 2D) = "black" {}
 		_NormalTex ("Normal", 2D) = "black" {}
 		_ViewDir ("View dir", Vector) = (0, 0, -1, 0)
-		_Refractive ("Refractive index", Float) = 1.33
-		_Aspect ("Aspect (H/W)", Float) = 1
+		_Params ("Depth aspect w/ width, w/ height, refractive index, 0", Vector) = (0.1, 0.1, 1.33, 0)
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -33,8 +32,7 @@
 			float4 _NormalTex_TexelSize;
 
 			float4 _ViewDir;
-			float _Refractive;
-			float _Aspect;
+			float4 _Params; // Depth aspect (d/w, d/h), Refractive index, 0, 0
 
             v2f vert (appdata v) {
                 v2f o;
@@ -45,8 +43,8 @@
 
             float4 frag (v2f i) : SV_Target {
                 float3 n = tex2D(_NormalTex, i.uv).xyz;
-				float3 refrDir = refract(_ViewDir, n, _Refractive);
-				float2 uv = i.uv + (_Aspect / abs(refrDir.z)) * refrDir.xy;
+				float3 refrDir = refract(_ViewDir, n, _Params.z);
+				float2 uv = i.uv + (_Params.xy / abs(refrDir.z)) * refrDir.xy;
 
                 float4 cmain = tex2D(_MainTex, uv);
 				return cmain;

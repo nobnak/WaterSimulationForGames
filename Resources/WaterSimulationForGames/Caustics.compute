@@ -6,7 +6,7 @@
 
 
 float4 _LightDir;
-float4 _Params; // Aspect (h/w), Refraction, 0, 0
+float4 _Params; // Depth aspect (d/w), Depth aspect (d/h), Refraction, 0
 
 float4 _TexelSize; // du, dv, w, h
 SamplerState sampler_Normal;
@@ -27,13 +27,13 @@ void Scan (uint3 id : SV_DispatchThreadID) {
 
 	int2 pixelG = id.xy;
 	float2 uvG = (pixelG + 0.5) * _TexelSize.xy;
-	float2 uvC = uvG - (_Params.x / abs(_LightDir.z)) * _LightDir.xy;
+	float2 uvC = uvG - (_Params.xy / abs(_LightDir.z)) * _LightDir.xy;
 
 	for (int x = -N_HALF; x <= N_HALF; x++) {
 		float2 uv = uvC + float2(x, 0) * _TexelSize.xy;
 		float3 n = _Normal.SampleLevel(sampler_Normal, uv, 0).xyz;
-		float3 refrDir = refract(_LightDir.xyz, n, _Params.y);
-		float2 uvI = uv + (_Params.x / abs(refrDir.z)) * refrDir.xy;
+		float3 refrDir = refract(_LightDir.xyz, n, _Params.z);
+		float2 uvI = uv + (_Params.xy / abs(refrDir.z)) * refrDir.xy;
 		float2 pixelI = uvI * _TexelSize.zw;
 
 		for (int y = 0; y < N; y++) {

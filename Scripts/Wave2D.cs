@@ -67,6 +67,10 @@ namespace WaterSimulationForGamesSystem {
 				}
 			}
 		}
+
+		public Vector2 DepthFieldAspect {
+			get { return pd.depthFieldAspect * new Vector2((float)size.y / size.x, 1f); }
+		}
 		#endregion
 
 		public Wave2D() {
@@ -93,7 +97,7 @@ namespace WaterSimulationForGamesSystem {
 
 
 				caustics.Refractive = pd.refractiveIndex;
-				caustics.Aspect = pd.height;
+				caustics.DepthFieldAspect = DepthFieldAspect;
 				caustics.LightDir = pd.lightDir;
 			};
 		}
@@ -212,8 +216,8 @@ namespace WaterSimulationForGamesSystem {
 		[System.Serializable]
 		public struct ParamPack : System.IEquatable<ParamPack> {
 			public Vector3 lightDir;
-			[Header("Depth-Field aspect (water height / field width)")]
-			public float height;
+			[Header("Depth-Field aspect (water depth / field height)")]
+			public float depthFieldAspect;
 			public float normalScale;
 			public float refractiveIndex;
 			public float speed;
@@ -223,7 +227,7 @@ namespace WaterSimulationForGamesSystem {
 			public static ParamPack CreateDefault() {
 				return new ParamPack() {
 					lightDir = new Vector3(0f, 0f, -1f),
-					height = 0.1f,
+					depthFieldAspect = 0.1f,
 					normalScale = 1f,
 					refractiveIndex = 1.33f,
 					speed = 50f,
@@ -241,7 +245,7 @@ namespace WaterSimulationForGamesSystem {
 			#region IEquatable
 			public bool Equals(ParamPack o) {
 				return lightDir == o.lightDir
-					&& height == o.height
+					&& depthFieldAspect == o.depthFieldAspect
 					&& normalScale == o.normalScale
 					&& refractiveIndex == o.refractiveIndex
 					&& speed == o.speed
@@ -256,7 +260,7 @@ namespace WaterSimulationForGamesSystem {
 			public override int GetHashCode() {
 				var v = 4049;
 				v = (v + lightDir.GetHashCode()) * 2801;
-				v = (v + height.GetHashCode()) * 2801;
+				v = (v + depthFieldAspect.GetHashCode()) * 2801;
 				v = (v + normalScale.GetHashCode()) * 2801;
 				v = (v + refractiveIndex.GetHashCode()) * 2801;
 				v = (v + speed.GetHashCode()) * 2801;

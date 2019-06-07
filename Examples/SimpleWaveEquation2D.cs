@@ -8,9 +8,8 @@ using WaterSimulationForGamesSystem.Core;
 
 public class SimpleWaveEquation2D : MonoBehaviour {
 	public static readonly int P_NORMAL_TEX = Shader.PropertyToID("_NormalTex");
-	public static readonly int P_ASPECT = Shader.PropertyToID("_Aspect");
 	public static readonly int P_CAUSTICS_TEX = Shader.PropertyToID("_CausticsTex");
-	public static readonly int P_REFRACTIVE = Shader.PropertyToID("_Refractive");
+	public static readonly int P_PARAMS = Shader.PropertyToID("_Params");
 
 	public enum OutputMode { Height = 0, Normal, Refract, Caustics_Scan, Caustics, Water }
 	[SerializeField]
@@ -76,6 +75,9 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 		var ioutput = (int)outputMode;
 		if (0 <= ioutput && ioutput < outputs.Length) {
 			var mat = outputs[ioutput];
+
+			var depthFieldAspect = wave.DepthFieldAspect;
+			var p = new Vector4(depthFieldAspect.x, depthFieldAspect.y, data.paramset.refractiveIndex, 0f);
 			switch (outputMode) {
 				default:
 					mat.mainTexture = wave.U;
@@ -85,8 +87,7 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 					break;
 				case OutputMode.Refract:
 					mat.SetTexture(P_NORMAL_TEX, wave.N);
-					mat.SetFloat(P_ASPECT, data.paramset.height);
-					mat.SetFloat(P_REFRACTIVE, data.paramset.refractiveIndex);
+					mat.SetVector(P_PARAMS, p);
 					break;
 				case OutputMode.Caustics:
 					mat.mainTexture = wave.C;
@@ -94,8 +95,7 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 				case OutputMode.Water:
 					mat.SetTexture(P_NORMAL_TEX,  wave.N);
 					mat.SetTexture(P_CAUSTICS_TEX, wave.C);
-					mat.SetFloat(P_ASPECT, data.paramset.height);
-					mat.SetFloat(P_REFRACTIVE, data.paramset.refractiveIndex);
+					mat.SetVector(P_PARAMS, p);
 					break;
 			}
 			rend.sharedMaterial = mat;
