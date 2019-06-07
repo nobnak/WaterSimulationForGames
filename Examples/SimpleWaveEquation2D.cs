@@ -39,12 +39,17 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 		col = GetComponent<Collider>();
 
 		validator.Reset();
+		validator.SetCheckers(() => !transform.hasChanged);
 		validator.Validation += () => {
 			var c = Camera.main;
-			var reqSize = new Vector2Int(c.pixelWidth >> data.lod, c.pixelHeight >> data.lod);
-			wave.SetSize(reqSize.y, reqSize.y);
+			var height = c.pixelHeight >> data.lod;
+			var localScale = transform.localScale;
+			var reqSize = new Vector2Int(Mathf.RoundToInt(height * localScale.x / localScale.y), height);
+			wave.SetSize(reqSize.x, reqSize.y);
 			wave.SetBoundary(data.boundary);
 			wave.Params = data.paramset;
+
+			transform.hasChanged = false;
 		};
 	}
 	private void OnValidate() {
