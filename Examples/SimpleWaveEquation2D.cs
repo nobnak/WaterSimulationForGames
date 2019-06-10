@@ -11,7 +11,7 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 	public static readonly int P_CAUSTICS_TEX = Shader.PropertyToID("_CausticsTex");
 	public static readonly int P_PARAMS = Shader.PropertyToID("_Params");
 
-	public enum OutputMode { Height = 0, Normal, Refract, Caustics_Scan, Caustics, Water }
+	public enum OutputMode { Height = 0, Normal, Refract, Caustics, Water }
 	[SerializeField]
 	protected OutputMode outputMode;
 	[SerializeField]

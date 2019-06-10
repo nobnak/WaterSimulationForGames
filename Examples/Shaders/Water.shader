@@ -18,6 +18,7 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+			#include "Water.cginc"
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -50,9 +51,16 @@
             }
 
             float4 frag (v2f i) : SV_Target {
+			    #if UNITY_UV_STARTS_AT_TOP
+				float scaleY = -1.0;
+				#else
+				float scaleY = 1.0;
+				#endif
+
                 float3 n = tex2D(_NormalTex, i.uv).xyz;
 				float3 refrDir = refract(_ViewDir, n, _Params.z);
-				float2 uv = i.uv + (_Params.xy / abs(refrDir.z)) * refrDir.xy;
+				//float2 uv = i.uv + (_Params.xy / abs(refrDir.z)) * refrDir.xy * float2(1, scaleY);
+				float2 uv = i.uv + UVOffsetByRefraction(_ViewDir, n, _Params.xy, _Params.z);
 
                 float4 cmain = tex2D(_MainTex, uv);
 				float intensity = tex2D(_CausticsTex, uv) * _CausticsGain;

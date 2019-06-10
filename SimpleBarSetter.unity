@@ -815,7 +815,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf8cf58a65747f94c8f24a5d6900a3ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  outputMode: 5
+  outputMode: 4
   update: 1
   data:
     texfilter: 1
@@ -824,7 +824,7 @@ MonoBehaviour:
     lod: 1
     paramset:
       lightDir: {x: 0, y: 0, z: -1}
-      height: 0.1
+      depthFieldAspect: 0.1
       normalScale: 1
       refractiveIndex: 1.33
       speed: 50
@@ -833,7 +833,6 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 471e48b4b64becb4ca07e60d5ea43846, type: 2}
   - {fileID: 2100000, guid: ae3511e2acbdaf1448b09c7ae3ab04b1, type: 2}
   - {fileID: 2100000, guid: cb5a773bf00c14e44a2c92c6b1206533, type: 2}
-  - {fileID: 2100000, guid: a3b30dc8177316540aa3c0636c7100c8, type: 2}
   - {fileID: 2100000, guid: a9fe34cba19f8d643aa6c325322b23e7, type: 2}
   - {fileID: 2100000, guid: 5ff826290fee46a449af25ee81f50961, type: 2}
 --- !u!23 &1623212703

@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Caustics_Scan
-  m_Shader: {fileID: 4800000, guid: c042071179751de4bbca3b177211607e, type: 3}
+  m_Name: Unlit_Water2
+  m_Shader: {fileID: 4800000, guid: ac10d545868fe5942b2c414acdf5bc40, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -19,16 +19,21 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _Tmp0:
+    - _CausticsTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _Tmp1:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _Blend: 0
-    - _Gain: 1
-    - _Index: 2.15
-    m_Colors: []
+    - _CausticsAmbience: 0
+    - _CausticsGain: 0.1
+    m_Colors:
+    - _Params: {r: 0.1, g: 0.1, b: 1.33, a: 0}
+    - _ViewDir: {r: 0, g: 0, b: -1, a: 0}

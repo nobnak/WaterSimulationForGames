@@ -1,7 +1,6 @@
 ﻿Shader "Unlit/Wave" {
     Properties {
         _MainTex ("Texture", 2D) = "black" {}
-		_Color ("Color", Color) = (1,0,0,1)
 		_Height ("Height", Float) = 1
     }
     SubShader {
@@ -27,7 +26,6 @@
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-			float4 _Color;
 			float _Height;
 
             v2f vert (appdata v) {
@@ -39,9 +37,8 @@
 
             float4 frag (v2f i) : SV_Target {
                 float u = tex2D(_MainTex, i.uv).x;
-				float4 c1 = 1 - float4(_Color.xyz, 0);
 				float t = u / _Height;
-				return (t >= 0) ? lerp(0, _Color, t) : lerp(0, c1, -t);
+				return float4(saturate(t), saturate(-t), 1 - abs(t), 1);
             }
             ENDCG
         }
