@@ -1,4 +1,4 @@
-﻿Shader "Unlit/Water" {
+﻿Shader "Unlit/WaterScreen" {
     Properties {
         _MainTex ("Texture", 2D) = "black" {}
 		_NormalTex ("Normal", 2D) = "black" {}
@@ -10,8 +10,9 @@
 		_CausticsAmbience ("Ambient", Range(0, 1)) = 0
     }
     SubShader {
-        Tags { "RenderType"="Opaque" }
-
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+		
+		GrabPass { "_BGTex" }
         Pass {
             CGPROGRAM
             #pragma vertex vert
@@ -43,6 +44,8 @@
 			float4 _ViewDir;
 			float4 _Params; // Depth aspect (d/w, d/h), Refractive index, 0, 0
 
+            sampler2D _BGTex;
+
             v2f vert (appdata v) {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
@@ -54,7 +57,9 @@
                 float3 n = tex2D(_NormalTex, i.uv).xyz;
 				float2 uv = i.uv + Water_UVoffsByRefraction(_ViewDir, n, _Params.xy, _Params.z);
 
-                float4 cmain = tex2D(_MainTex, uv);
+				float4 gpos = Water_GrabScreenPosFromLocalUV(uv);
+                float4 cmain = tex2Dproj(_BGTex, gpos);
+
 				float intensity = tex2D(_CausticsTex, uv) * _CausticsGain;
 				return cmain * lerp(intensity, 1, _CausticsAmbience);
             }

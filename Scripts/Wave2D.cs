@@ -58,6 +58,9 @@ namespace WaterSimulationForGamesSystem {
 		public RenderTexture N { get { return n; } }
 		public RenderTexture C { get { return c; } }
 
+		public RenderTexture Tmp0 { get { return tmp0; } }
+		public RenderTexture Tmp1 { get { return tmp1; } }
+
 		public ParamPack Params {
 			get { return pd; }
 			set {
@@ -229,7 +232,7 @@ namespace WaterSimulationForGamesSystem {
 					lightDir = new Vector3(0f, 0f, -1f),
 					depthFieldAspect = 0.1f,
 					normalScale = 1f,
-					refractiveIndex = 1.33f,
+					refractiveIndex = 0.752f,
 					speed = 50f,
 					quality = 1,
 				};

@@ -10,8 +10,10 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 	public static readonly int P_NORMAL_TEX = Shader.PropertyToID("_NormalTex");
 	public static readonly int P_CAUSTICS_TEX = Shader.PropertyToID("_CausticsTex");
 	public static readonly int P_PARAMS = Shader.PropertyToID("_Params");
+	public static readonly int P_TMP0 = Shader.PropertyToID("_TmpTex0");
+	public static readonly int P_TMP1 = Shader.PropertyToID("_TmpTex1");
 
-	public enum OutputMode { Height = 0, Normal, Refract, Caustics, Water }
+	public enum OutputMode { Height = 0, Normal, Refract, Caustics, Water, Water_Screen }
 	[SerializeField]
 	protected OutputMode outputMode;
 	[SerializeField]
@@ -96,8 +98,11 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 					break;
 				case OutputMode.Caustics:
 					mat.mainTexture = wave.C;
+					mat.SetTexture(P_TMP0, wave.Tmp0);
+					mat.SetTexture(P_TMP1, wave.Tmp1);
 					break;
 				case OutputMode.Water:
+				case OutputMode.Water_Screen:
 					mat.SetTexture(P_NORMAL_TEX,  wave.N);
 					mat.SetTexture(P_CAUSTICS_TEX, wave.C);
 					mat.SetVector(P_PARAMS, p);

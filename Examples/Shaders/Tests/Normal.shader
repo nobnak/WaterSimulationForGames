@@ -37,7 +37,8 @@
 
             float4 frag (v2f i) : SV_Target {
                 float3 n = tex2D(_MainTex, i.uv).xyz;
-				return float4(0.5 * (_Gain * n + 1), 1);
+				float2 rg = _Gain * n.xy + 0.5;
+				return float4(rg, saturate(1 - max(rg.x, rg.y)), 1);
             }
             ENDCG
         }

@@ -56,6 +56,10 @@ namespace WaterSimulationForGamesSystem.Core {
 			cs.Dispatch(K_SCAN, ds.x, ds.y, ds.z);
 		}
 		public void Accumulate(RenderTexture c, RenderTexture tmp0, RenderTexture tmp1) {
+			cs.SetVector(P_LIGHT_DIR, lightDir);
+			cs.SetVector(P_PARAMS, GetParams());
+			cs.SetVector(P_TEXEL_SIZE, CalculateTexelSize(c));
+
 			cs.SetTexture(K_ACCUMULATE, P_TMP0, tmp0);
 			cs.SetTexture(K_ACCUMULATE, P_TMP1, tmp1);
 			cs.SetTexture(K_ACCUMULATE, P_CAUSTICS, c);
