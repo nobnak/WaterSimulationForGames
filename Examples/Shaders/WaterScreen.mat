@@ -32,8 +32,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _CausticsAmbience: 0.378
+    - _CausticsAmbience: 0.17
     - _CausticsGain: 1
     m_Colors:
-    - _Params: {r: 0.1, g: 0.1, b: 0.752, a: 0}
+    - _Params: {r: 0.02, g: 0.02, b: 0.752, a: 0}
     - _ViewDir: {r: 0, g: 0, b: -1, a: 0}

@@ -45,7 +45,7 @@ void Clamp(uint3 id : SV_DispatchThreadID) {
 	float u = _U0[c];
 	float v = _V[c];
 
-	float dl = saturate(1e-1 * _Params.y * _Params.z);
+	float dl = saturate(_Params.w);
 	v = lerp(v, 0, dl);
 	u = lerp(u, 0, dl);
 

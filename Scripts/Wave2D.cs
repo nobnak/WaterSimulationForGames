@@ -22,6 +22,7 @@ namespace WaterSimulationForGamesSystem {
 		protected Caustics caustics;
 		protected Normal2D normal;
 		protected Uploader uploader;
+		protected Boundary boundary;
 		protected WaveEquation2D wave;
 
 		protected RenderTexture v;
@@ -46,6 +47,7 @@ namespace WaterSimulationForGamesSystem {
 			normal.Dispose();
 			caustics.Dispose();
 			uploader.Dispose();
+			boundary.Dispose();
 			ReleaseTextures();
 		}
 		#endregion
@@ -82,6 +84,7 @@ namespace WaterSimulationForGamesSystem {
 			normal = new Normal2D();
 			caustics = new Caustics();
 			uploader = new Uploader();
+			boundary = new Boundary();
 			wave = new WaveEquation2D();
 
 			validator.Reset();
@@ -90,8 +93,8 @@ namespace WaterSimulationForGamesSystem {
 
 				wave.C = pd.speed;
 				wave.Dxy = 1e3f / size.y;
-				dt = Mathf.Min(wave.SupDt(), 0.1f) / (2f * pd.quality);
-				wave.Dt = dt;
+				wave.Dt = dt = Mathf.Min(wave.SupDt(), 0.1f) / (2f * pd.quality);
+				wave.Damp = pd.damping;
 				Debug.LogFormat("Set dt={0}", dt);
 				if (dt < 1e-3f)
 					throw new System.InvalidOperationException(string.Format("dt={0} is too small", dt));
@@ -105,19 +108,23 @@ namespace WaterSimulationForGamesSystem {
 			};
 		}
 
-		public void SetBoundary(Texture2D boundary) {
-			if (boundary != null && boundary.isReadable) {
+		public void SetBoundary(Texture2D srcImage) {
+			if (srcImage != null && srcImage.isReadable) {
+#if CPU_BASED
 				var duvdxy = new Vector2(1f / (b.width - 1), 1f / (b.height - 1));
 				var bupload = new List<int>(b.width * b.height);
 				for (var y = 0; y < b.height; y++) {
 					for (var x = 0; x < b.width; x++) {
-						var c = boundary.GetPixelBilinear(
+						var c = srcImage.GetPixelBilinear(
 							(x + 0.5f) * duvdxy.x,
 							(y + 0.5f) * duvdxy.y);
 						bupload.Add(c.r > 0.5f ? 1 : 0);
 					}
 				}
 				uploader.Upload(b, bupload);
+#else
+				boundary.Convert(b, srcImage);
+#endif
 			}
 		}
 
@@ -151,17 +158,19 @@ namespace WaterSimulationForGamesSystem {
 				time -= dt;
 				wave.Next(u1, u0, v, b);
 				Swap();
-				wave.Clamp(u1, u0, v, b);
-				Swap();
+				if (pd.damping > 0f) {
+					wave.Clamp(u1, u0, v, b);
+					Swap();
+				}
 			}
 
 			normal.Generate(n, u0);
 
 			caustics.Generate(c, n, tmp0, tmp1);
 		}
-		#endregion
+#endregion
 
-		#region member
+#region member
 		private void CreateTextures() {
 			var formatf = RenderTextureFormat.RFloat;
 			var formati = RenderTextureFormat.RInt;
@@ -213,9 +222,9 @@ namespace WaterSimulationForGamesSystem {
 			u1 = u0;
 			u0 = tmp;
 		}
-		#endregion
+#endregion
 
-		#region definitions
+#region definitions
 		[System.Serializable]
 		public struct ParamPack : System.IEquatable<ParamPack> {
 			public Vector3 lightDir;
@@ -225,8 +234,9 @@ namespace WaterSimulationForGamesSystem {
 			public float refractiveIndex;
 			public float speed;
 			public int quality;
+			public float damping;
 
-			#region static
+#region static
 			public static ParamPack CreateDefault() {
 				return new ParamPack() {
 					lightDir = new Vector3(0f, 0f, -1f),
@@ -235,6 +245,7 @@ namespace WaterSimulationForGamesSystem {
 					refractiveIndex = 0.752f,
 					speed = 50f,
 					quality = 1,
+					damping = 0f
 				};
 			}
 			public static bool operator ==(ParamPack a, ParamPack b) {
@@ -243,20 +254,21 @@ namespace WaterSimulationForGamesSystem {
 			public static bool operator !=(ParamPack a, ParamPack b) {
 				return !a.Equals(b);
 			}
-			#endregion
+#endregion
 
-			#region IEquatable
+#region IEquatable
 			public bool Equals(ParamPack o) {
 				return lightDir == o.lightDir
 					&& depthFieldAspect == o.depthFieldAspect
 					&& normalScale == o.normalScale
 					&& refractiveIndex == o.refractiveIndex
 					&& speed == o.speed
-					&& quality == o.quality;
+					&& quality == o.quality
+					&& damping == o.damping;
 			}
-			#endregion
+#endregion
 
-			#region Object
+#region Object
 			public override bool Equals(object obj) {
 				return (obj is ParamPack) && Equals((ParamPack)obj);
 			}
@@ -268,10 +280,11 @@ namespace WaterSimulationForGamesSystem {
 				v = (v + refractiveIndex.GetHashCode()) * 2801;
 				v = (v + speed.GetHashCode()) * 2801;
 				v = (v + quality.GetHashCode()) * 2801;
+				v = (v + damping.GetHashCode()) * 2801;
 				return v;
 			}
-			#endregion
+#endregion
 		}
-		#endregion
+#endregion
 	}
 }

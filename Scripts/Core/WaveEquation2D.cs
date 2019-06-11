@@ -29,11 +29,13 @@ namespace WaterSimulationForGamesSystem.Core {
 
 			C = 1f;
 			Dxy = 1f;
+			Damp = 1e-1f;
 		}
 
 		public float C { get ; set; }
 		public float Dxy { get; set; }
 		public float Dt { get; set; }
+		public float Damp { get; set; }
 		public void Next(RenderTexture u1, Texture u0, RenderTexture v, RenderTexture b) {
 			var size = new Vector3Int(v.width, v.height, 1);
 			cs.SetInts(P_COUNT, size.x, size.y);
@@ -77,7 +79,7 @@ namespace WaterSimulationForGamesSystem.Core {
 
 		#region member
 		private Vector4 Params() {
-			return new Vector4(C * C / (Dxy * Dxy), Dxy, Dt, 0f);
+			return new Vector4(C * C / (Dxy * Dxy), Dxy, Dt, Damp * Dxy * Dt);
 		}
 		#endregion
 	}
