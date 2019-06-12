@@ -11,6 +11,8 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 	[SerializeField]
 	protected float maxSlope = 1f;
 	[SerializeField]
+	protected float damping = 1e-3f;
+	[SerializeField]
 	protected int count = 100;
 	[SerializeField]
 	protected float intakePower = 1f;
@@ -78,13 +80,15 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 
 			wave.C = speed;
 			wave.Dxy = size / count;
-			wave.MaxSlope = maxSlope;
+			wave.Damp = damping;
+
+			dt = Mathf.Min(wave.SupDt(), 0.1f) / (2 * quality);
+			Debug.LogFormat("Set dt={0} for speed={1}", dt, speed);
+			wave.Dt = dt;
 
 			graph.Peak = maxSlope * 2;
 
 			time = 0f;
-			dt = Mathf.Min(wave.SupDt(), 0.1f) / (2 * quality);
-			Debug.LogFormat("Set dt={0} for speed={1}", dt, speed);
 		};
 	}
 
@@ -116,7 +120,7 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 			time += Time.deltaTime;
 			while (time >= dt) {
 				time -= dt;
-				wave.Next(u1, u0, v, b, dt);
+				wave.Next(u1, u0, v, b);
 				Swap();
 				wave.Clamp(u1, u0, v, b);
 				Swap();

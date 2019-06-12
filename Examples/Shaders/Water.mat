@@ -38,5 +38,5 @@ Material:
     - _Refractive: 1.33
     m_Colors:
     - _CausticsColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Params: {r: 0.02, g: 0.02, b: 0.752, a: 0}
+    - _Params: {r: 0.03, g: 0.03, b: 0.752, a: 0}
     - _ViewDir: {r: 0, g: 0, b: -1, a: 0}

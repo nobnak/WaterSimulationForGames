@@ -35,5 +35,5 @@ Material:
     - _CausticsAmbience: 0.17
     - _CausticsGain: 1
     m_Colors:
-    - _Params: {r: 0.02, g: 0.02, b: 0.752, a: 0}
+    - _Params: {r: 0.05, g: 0.05, b: 0.752, a: 0}
     - _ViewDir: {r: 0, g: 0, b: -1, a: 0}
