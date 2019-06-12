@@ -1,6 +1,6 @@
 # Water Surface Wave Simulation for Unity
 
-[![Screenshot](http://img.youtube.com/vi/b0T19NywALw/sddefault.jpg)](https://www.youtube.com/watch?v=b0T19NywALw)
+[![Screenshot](http://img.youtube.com/vi/4DsWHbsYC94/0.jpg)](https://youtu.be/4DsWHbsYC94)
 
 ## Installation
 ```
