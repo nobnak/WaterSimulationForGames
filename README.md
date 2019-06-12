@@ -1,6 +1,7 @@
 # Water Surface Wave Simulation for Unity
 - Developed & tested only in DirectX 11 (GeForce 1080 & Intel UHD 620)
 - Executable file can be find from [releases](../../releases)
+- A rewrite of [CausticsUnity (2014)](https://github.com/nobnak/CausticsUnity) with Compute Shader
 
 [![Screenshot](http://img.youtube.com/vi/4Njpapj7Cmc/0.jpg)](https://youtu.be/4Njpapj7Cmc)
 
