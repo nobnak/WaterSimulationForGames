@@ -1,4 +1,5 @@
 # Water Surface Wave Simulation for Unity
+- Developed & tested only in DirectX 11 (GeForce 1080 & Intel UHD 620)
 
 [![Screenshot](http://img.youtube.com/vi/4Njpapj7Cmc/0.jpg)](https://youtu.be/4Njpapj7Cmc)
 
