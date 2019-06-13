@@ -11,7 +11,7 @@ RWTexture2D<float> _V;
 Texture2D<float> _U0;
 RWTexture2D<float> _U1;
 
-float4 _Params; // c^2/Dxy^2, Dxy, dt, 0
+float4 _Params; // Dt, Damp, 0, 0
 
 
 
@@ -29,11 +29,11 @@ void Next(uint3 id : SV_DispatchThreadID) {
 	int4 b1 = int4(_B[ix.xy], _B[ix.zw], _B[iy.xy], _B[iy.zw]);
 	float4 u1 = float4(_U0[ix.xy], _U0[ix.zw], _U0[iy.xy], _U0[iy.zw]);
 	u1 = (b1 == 0) ? u1 : u;
-	float uo = dot(u1, 1) - 4 * u;
-	float a = _Params.x * uo;
+	float a = dot(u1, 1) - 4 * u;
+	float dt = _Params.x;
 
-	v += a * _Params.z;
-	u += v * _Params.z;
+	v += a * dt;
+	u += v * dt;
 
 	_V[c] = v;
 	_U1[c] = u;
@@ -45,7 +45,7 @@ void Clamp(uint3 id : SV_DispatchThreadID) {
 	float u = _U0[c];
 	float v = _V[c];
 
-	float dl = saturate(_Params.w);
+	float dl = saturate(_Params.y);
 	v = lerp(v, 0, dl);
 	u = lerp(u, 0, dl);
 

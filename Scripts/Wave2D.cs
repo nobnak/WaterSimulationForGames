@@ -35,7 +35,6 @@ namespace WaterSimulationForGamesSystem {
 		protected Renderer rend;
 		protected Collider col;
 		protected float time;
-		protected float dt;
 
 		#region interface
 
@@ -91,15 +90,10 @@ namespace WaterSimulationForGamesSystem {
 			validator.Validation += () => {
 				time = 0f;
 
-				wave.C = pd.speed;
-				wave.Dxy = 1e3f / size.y;
-				wave.Dt = dt = Mathf.Min(wave.SupDt(), 0.1f) / (2f * pd.quality);
-				wave.Damp = pd.damping;
-				Debug.LogFormat("Set dt={0}", dt);
-				if (dt < 1e-3f)
-					throw new System.InvalidOperationException(string.Format("dt={0} is too small", dt));
+				wave.Dt = pd.dt;
+				wave.Damp = Mathf.Clamp01(pd.damping * pd.dt);
 
-				normal.Dxy = pd.normalScale * wave.Dxy;
+				normal.Dxy = pd.normalScale;
 
 
 				caustics.Refractive = pd.refractiveIndex;
@@ -128,7 +122,7 @@ namespace WaterSimulationForGamesSystem {
 			}
 		}
 
-		public void SetSize(int width, int height, bool quantize = true) {
+		public void SetSize(int width, int height, bool quantize = false) {
 			if (width < 4 || height < 4)
 				throw new System.ArgumentException(
 					string.Format("Invalid size : {0}x{1}", width, height));
@@ -153,9 +147,9 @@ namespace WaterSimulationForGamesSystem {
 		public void Update() {
 			validator.Validate();
 
-			time += Time.deltaTime;
-			while (time >= dt) {
-				time -= dt;
+			time += Time.deltaTime * pd.speed;
+			while (time >= wave.Dt && wave.Dt > 0) {
+				time -= wave.Dt;
 				wave.Next(u1, u0, v, b);
 				Swap();
 				if (pd.damping > 0f) {
@@ -176,16 +170,30 @@ namespace WaterSimulationForGamesSystem {
 			var formati = RenderTextureFormat.RInt;
 			v = new RenderTexture(size.x, size.y, 0, formatf) {
 				enableRandomWrite = true,
+				useMipMap = false
 			};
 			u0 = new RenderTexture(v.descriptor);
 			u1 = new RenderTexture(v.descriptor);
-			b = new RenderTexture(size.x, size.y, 0, formati) { enableRandomWrite = true };
+			b = new RenderTexture(size.x, size.y, 0, formati) {
+				enableRandomWrite = true,
+				useMipMap = false,
+			};
 			n = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGBFloat) {
 				enableRandomWrite = true,
+				useMipMap = false,
 			};
-			tmp0 = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGBFloat) { enableRandomWrite = true };
-			tmp1 = new RenderTexture(tmp0.descriptor) { enableRandomWrite = true };
-			c = new RenderTexture(v.descriptor) { enableRandomWrite = true };
+			tmp0 = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGBFloat) {
+				enableRandomWrite = true,
+				useMipMap = false,
+			};
+			tmp1 = new RenderTexture(tmp0.descriptor) {
+				enableRandomWrite = true,
+				useMipMap = false,
+			};
+			c = new RenderTexture(v.descriptor) {
+				enableRandomWrite = true,
+				useMipMap = false,
+			};
 			v.Create();
 			u0.Create();
 			u1.Create();
@@ -233,7 +241,7 @@ namespace WaterSimulationForGamesSystem {
 			public float normalScale;
 			public float refractiveIndex;
 			public float speed;
-			public int quality;
+			public float dt;
 			public float damping;
 
 #region static
@@ -244,7 +252,7 @@ namespace WaterSimulationForGamesSystem {
 					normalScale = 1f,
 					refractiveIndex = 0.752f,
 					speed = 50f,
-					quality = 1,
+					dt = 1f,
 					damping = 0f
 				};
 			}
@@ -263,7 +271,7 @@ namespace WaterSimulationForGamesSystem {
 					&& normalScale == o.normalScale
 					&& refractiveIndex == o.refractiveIndex
 					&& speed == o.speed
-					&& quality == o.quality
+					&& dt == o.dt
 					&& damping == o.damping;
 			}
 #endregion
@@ -279,7 +287,7 @@ namespace WaterSimulationForGamesSystem {
 				v = (v + normalScale.GetHashCode()) * 2801;
 				v = (v + refractiveIndex.GetHashCode()) * 2801;
 				v = (v + speed.GetHashCode()) * 2801;
-				v = (v + quality.GetHashCode()) * 2801;
+				v = (v + dt.GetHashCode()) * 2801;
 				v = (v + damping.GetHashCode()) * 2801;
 				return v;
 			}

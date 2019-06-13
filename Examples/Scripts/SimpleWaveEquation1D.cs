@@ -7,7 +7,7 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 	[SerializeField]
 	protected float speed = 1f;
 	[SerializeField]
-	protected float size = 1000f;
+	protected float dt = 1f;
 	[SerializeField]
 	protected float maxSlope = 1f;
 	[SerializeField]
@@ -32,7 +32,6 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 	protected Validator validator = new Validator();
 
 	protected float time;
-	protected float dt;
 	protected RenderTexture v;
 	protected RenderTexture u0, u1;
 	protected RenderTexture b;
@@ -50,41 +49,16 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 
 		validator.Reset();
 		validator.Validation += () => {
-			ReleaseBuffers();
-
-			var formatfloat = RenderTextureFormat.RFloat;
-			var formatint = RenderTextureFormat.RInt;
-			v = new RenderTexture(count, 1, 0, formatfloat) {
-				enableRandomWrite = true
-			};
-			u0 = new RenderTexture(v.descriptor);
-			u1 = new RenderTexture(v.descriptor);
-			b = new RenderTexture(count, 1, 0, formatint, RenderTextureReadWrite.Linear) {
-				enableRandomWrite = true
-			};
-			v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
-			v.wrapMode = u0.wrapMode = u1.wrapMode = TextureWrapMode.Clamp;
-			v.Create();
-			u0.Create();
-			u1.Create();
-			b.Create();
-			
-			foreach (var r in new RenderTexture[] { v, u0, u1 })
-				clear.Float(r);
+			SetSize(count);
 
 			var bs = new int[count];
 			var mod = Mathf.RoundToInt(count / 2f);
-			for (var i = 0; i < bs.Length; i++)
-				bs[i] = ((i % mod) == 0) ? 1 : 0;
+			//for (var i = 0; i < bs.Length; i++)
+			//	bs[i] = ((i % mod) == 0) ? 1 : 0;
 			uploader.Upload(b, bs);
 
-			wave.C = speed;
-			wave.Dxy = size / count;
-			wave.Damp = damping;
-
-			dt = Mathf.Min(wave.SupDt(), 0.1f) / (2 * quality);
-			Debug.LogFormat("Set dt={0} for speed={1}", dt, speed);
 			wave.Dt = dt;
+			wave.Damp = damping * dt;
 
 			graph.Peak = maxSlope * 2;
 
@@ -99,7 +73,7 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 		ReleaseBuffers();
 	}
 	private void OnValidate() {
-		//validator.Invalidate();
+		validator.Invalidate();
 	}
 	private void Update() {
 		validator.Validate();
@@ -117,13 +91,15 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 		}
 
 		if (update) {
-			time += Time.deltaTime;
+			time += Time.deltaTime * speed;
 			while (time >= dt) {
 				time -= dt;
 				wave.Next(u1, u0, v, b);
 				Swap();
-				wave.Clamp(u1, u0, v, b);
-				Swap();
+				if (wave.Damp > 0) {
+					wave.Clamp(u1, u0, v, b);
+					Swap();
+				}
 			}
 		}
 
@@ -145,5 +121,39 @@ public class SimpleWaveEquation1D : MonoBehaviour {
 		u1.DestroySelf();
 	}
 
-#endregion
+	private void SetSize(int count) {
+		if (v == null || v.width != count) {
+			ReleaseBuffers();
+			CreateBuffers(count);
+			ClearBuffers();
+		}
+	}
+
+	private void ClearBuffers() {
+		foreach (var r in new RenderTexture[] { v, u0, u1 })
+			clear.Float(r);
+	}
+
+	private void CreateBuffers(int count) {
+		var formatfloat = RenderTextureFormat.RFloat;
+		var formatint = RenderTextureFormat.RInt;
+		v = new RenderTexture(count, 1, 0, formatfloat) {
+			enableRandomWrite = true,
+			useMipMap = false
+		};
+		u0 = new RenderTexture(v.descriptor);
+		u1 = new RenderTexture(v.descriptor);
+		b = new RenderTexture(count, 1, 0, formatint, RenderTextureReadWrite.Linear) {
+			enableRandomWrite = true,
+			useMipMap = false
+		};
+		v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
+		v.wrapMode = u0.wrapMode = u1.wrapMode = TextureWrapMode.Clamp;
+		v.Create();
+		u0.Create();
+		u1.Create();
+		b.Create();
+	}
+
+	#endregion
 }

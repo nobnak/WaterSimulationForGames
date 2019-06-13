@@ -70,8 +70,8 @@ public class SimpleWaveEquation2D : MonoBehaviour {
 			if (col.Raycast(ray, out hit, float.MaxValue)) {
 				var uv = hit.textureCoord;
 				var w = 1f * (2f * Mathf.PI) * Time.time;
-				var power = data.intakePower * Mathf.Sin(w); // * Time.deltaTime;
-				stamp.Draw(wave.U, uv, 1e-2f * Vector2.one, power);
+				var power = data.intakePower; // * Mathf.Sin(w); // * Time.deltaTime;
+				stamp.Draw(wave.U, uv, 5e-2f * Vector2.one, power);
 			}
 		}
 
