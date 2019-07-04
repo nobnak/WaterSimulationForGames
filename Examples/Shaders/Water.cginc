@@ -25,9 +25,12 @@ float4 Water_GrabScreenPosFromLocalUV(float2 uv) {
 	return gpos;
 }
 
-float2 Water_UVoffsByRefraction(float3 _ViewDir, float3 n, float2 depthFieldAspect, float refractive) {
-	float3 refrDir = refract(_ViewDir, n, refractive);
+float2 Water_UVoffsByRefraction(float3 view, float3 n, float2 depthFieldAspect, float refractive) {
+	float3 refrDir = refract(view, n, refractive);
 	return (depthFieldAspect / abs(refrDir.z)) * refrDir.xy;
+}
+float2 Water_UVoffsByRefraction2(float3 view, float3 n, float4 params) {
+	return Water_UVoffsByRefraction(view, n, params.xy, params.z);
 }
 
 

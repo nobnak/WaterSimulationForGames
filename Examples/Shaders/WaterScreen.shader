@@ -55,7 +55,7 @@
 
             float4 frag (v2f i) : SV_Target {
                 float3 n = tex2D(_NormalTex, i.uv).xyz;
-				float2 uv = i.uv + Water_UVoffsByRefraction(_ViewDir, n, _Params.xy, _Params.z);
+				float2 uv = i.uv + Water_UVoffsByRefraction2(_ViewDir, n, _Params);
 
 				float4 gpos = Water_GrabScreenPosFromLocalUV(uv);
                 float4 cmain = tex2Dproj(_BGTex, gpos);

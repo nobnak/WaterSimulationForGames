@@ -248,12 +248,12 @@ namespace WaterSimulationForGamesSystem {
 			public static ParamPack CreateDefault() {
 				return new ParamPack() {
 					lightDir = new Vector3(0f, 0f, -1f),
-					depthFieldAspect = 0.1f,
+					depthFieldAspect = 0.05f,
 					normalScale = 1f,
 					refractiveIndex = 0.752f,
-					speed = 50f,
-					dt = 1f,
-					damping = 0f
+					speed = 30f,
+					dt = 0.01f,
+					damping = 0.01f
 				};
 			}
 			public static bool operator ==(ParamPack a, ParamPack b) {
