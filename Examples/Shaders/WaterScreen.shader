@@ -1,18 +1,20 @@
 ﻿Shader "Unlit/WaterScreen" {
     Properties {
-        _MainTex ("Texture", 2D) = "black" {}
+		_WaterColor ("Water color", Color) = (1,1,1,1)
+
 		_NormalTex ("Normal", 2D) = "black" {}
 		_ViewDir ("View dir", Vector) = (0, 0, -1, 0)
 		_Params ("Depth aspect w/ width, w/ height, refractive index, 0", Vector) = (0.1, 0.1, 1.33, 0)
 
-		_CausticsTex ("Caustics", 2D) = "black" {}
+		_CausticsTex ("Caustics", 2D) = "white" {}
 		_CausticsGain ("Caustics Gain", Float) = 0.1
 		_CausticsAmbience ("Ambient", Range(0, 1)) = 0
     }
     SubShader {
         Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+		ZTest LEqual ZWrite Off Cull Off
 		
-		GrabPass { "_BGTex" }
+		GrabPass { "_GrabTex" }
         Pass {
             CGPROGRAM
             #pragma vertex vert
@@ -31,8 +33,7 @@
                 float4 vertex : SV_POSITION;
             };
 
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
+			float4 _WaterColor;
 
 			sampler2D _NormalTex;
 			float4 _NormalTex_TexelSize;
@@ -44,12 +45,12 @@
 			float4 _ViewDir;
 			float4 _Params; // Depth aspect (d/w, d/h), Refractive index, 0, 0
 
-            sampler2D _BGTex;
+            sampler2D _GrabTex;
 
             v2f vert (appdata v) {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.uv =v.uv;
                 return o;
             }
 
@@ -58,10 +59,10 @@
 				float2 uv = i.uv + Water_UVoffsByRefraction2(_ViewDir, n, _Params);
 
 				float4 gpos = Water_GrabScreenPosFromLocalUV(uv);
-                float4 cmain = tex2Dproj(_BGTex, gpos);
+                float4 cmain = tex2Dproj(_GrabTex, gpos);
 
 				float intensity = tex2D(_CausticsTex, uv) * _CausticsGain;
-				return cmain * lerp(intensity, 1, _CausticsAmbience);
+				return cmain * _WaterColor * lerp(intensity, 1, _CausticsAmbience);
             }
             ENDCG
         }
