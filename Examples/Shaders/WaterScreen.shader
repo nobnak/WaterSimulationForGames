@@ -1,6 +1,8 @@
 ﻿Shader "Unlit/WaterScreen" {
     Properties {
 		_WaterColor ("Water color", Color) = (1,1,1,1)
+		_WaterMaskTex ("Water mask", 2D) = "white" {}
+		_WaterMaskShift ("Water mask shift", Vector) = (1, 1, 0, 0)
 
 		_NormalTex ("Normal", 2D) = "black" {}
 		_ViewDir ("View dir", Vector) = (0, 0, -1, 0)
@@ -34,6 +36,8 @@
             };
 
 			float4 _WaterColor;
+			sampler2D _WaterMaskTex;
+			float4 _WaterMaskShift;
 
 			sampler2D _NormalTex;
 			float4 _NormalTex_TexelSize;
@@ -60,9 +64,10 @@
 
 				float4 gpos = Water_GrabScreenPosFromLocalUV(uv);
                 float4 cmain = tex2Dproj(_GrabTex, gpos);
+				float4 cmask = tex2D(_WaterMaskTex, _WaterMaskShift.xy * i.uv + _WaterMaskShift.zw);
 
 				float intensity = tex2D(_CausticsTex, uv) * _CausticsGain;
-				return cmain * _WaterColor * lerp(intensity, 1, _CausticsAmbience);
+				return cmain * cmask * _WaterColor * lerp(intensity, 1, _CausticsAmbience);
             }
             ENDCG
         }
