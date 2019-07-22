@@ -1096,7 +1096,7 @@ MonoBehaviour:
   update: 1
   data:
     texfilter: 1
-    boundary: {fileID: 2800000, guid: 3ac3a24d208c6a7478a0027c9d79e325, type: 3}
+    boundary: {fileID: 2800000, guid: a4b155b42d2d24b4db2e14a5d83015d0, type: 3}
     intakePower: 10
     intakeSize: 0.01
     lod: 1
