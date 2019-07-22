@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using WaterSimulationForGamesSystem.Core;
 
-namespace WaterSimulationForGamesSystem.Examples {
+namespace WaterSimulationForGames.Example {
 
 	[ExecuteInEditMode]
 	public class SimpleBarSetterBuf : MonoBehaviour {

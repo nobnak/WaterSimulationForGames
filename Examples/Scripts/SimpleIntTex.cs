@@ -3,41 +3,44 @@ using UnityEngine;
 using WaterSimulationForGamesSystem;
 using WaterSimulationForGamesSystem.Core;
 
-public class SimpleIntTex : MonoBehaviour {
+namespace WaterSimulationForGames.Example {
 
-	public static readonly int P_TARGET_TEX = Shader.PropertyToID("_TargetTex");
+	public class SimpleIntTex : MonoBehaviour {
 
-	[SerializeField]
-	protected int count = 100;
+		public static readonly int P_TARGET_TEX = Shader.PropertyToID("_TargetTex");
 
-	protected Material mat;
-	protected RenderTexture tex;
+		[SerializeField]
+		protected int count = 100;
 
-	protected Uploader uploader;
-	protected Clear clear;
+		protected Material mat;
+		protected RenderTexture tex;
 
-	private void OnEnable() {
-		uploader = new Uploader();
-		clear = new Clear();
+		protected Uploader uploader;
+		protected Clear clear;
 
-		var format = RenderTextureFormat.RInt;
-		tex = new RenderTexture(count, 1, 0, format, RenderTextureReadWrite.Linear) {
-			enableRandomWrite = true
-		};
-		tex.Create();
+		private void OnEnable() {
+			uploader = new Uploader();
+			clear = new Clear();
 
-		mat = GetComponent<Renderer>().sharedMaterial;
+			var format = RenderTextureFormat.RInt;
+			tex = new RenderTexture(count, 1, 0, format, RenderTextureReadWrite.Linear) {
+				enableRandomWrite = true
+			};
+			tex.Create();
 
-		var buf = new int[count];
-		for (var i = 0; i < buf.Length; i++)
-			buf[i] = Mathf.RoundToInt(i);
-		uploader.Upload(tex, buf);
+			mat = GetComponent<Renderer>().sharedMaterial;
 
-		mat.SetTexture(P_TARGET_TEX, tex);
-	}
-	private void OnDisable() {
-		clear.Dispose();
-		uploader.Dispose();
-		tex.DestroySelf();
+			var buf = new int[count];
+			for (var i = 0; i < buf.Length; i++)
+				buf[i] = Mathf.RoundToInt(i);
+			uploader.Upload(tex, buf);
+
+			mat.SetTexture(P_TARGET_TEX, tex);
+		}
+		private void OnDisable() {
+			clear.Dispose();
+			uploader.Dispose();
+			tex.DestroySelf();
+		}
 	}
 }

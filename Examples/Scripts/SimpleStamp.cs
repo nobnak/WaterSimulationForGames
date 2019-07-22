@@ -5,43 +5,46 @@ using UnityEngine;
 using WaterSimulationForGamesSystem;
 using WaterSimulationForGamesSystem.Core;
 
-public class SimpleStamp : MonoBehaviour {
+namespace WaterSimulationForGames.Example {
 
-	[SerializeField]
-	protected float scale = 1f;
-	[SerializeField]
-	protected float density = 1f;
+	public class SimpleStamp : MonoBehaviour {
 
-	protected Stamp stamp;
-	protected RenderTexture canvas;
+		[SerializeField]
+		protected float scale = 1f;
+		[SerializeField]
+		protected float density = 1f;
 
-	protected Material mat;
-	protected Collider col;
+		protected Stamp stamp;
+		protected RenderTexture canvas;
 
-	#region unity
-	private void OnEnable() {
-		stamp = new Stamp();
-		canvas = new RenderTexture(512, 512, 0);
+		protected Material mat;
+		protected Collider col;
 
-		mat = GetComponent<Renderer>().sharedMaterial;
-		col = GetComponent<Collider>();
+		#region unity
+		private void OnEnable() {
+			stamp = new Stamp();
+			canvas = new RenderTexture(512, 512, 0);
 
-		mat.mainTexture = canvas;
-	}
-	private void OnDisable() {
-		stamp.Dispose();
-		canvas.DestroySelf();
-	}
-	private void Update() {
-		if (Input.GetMouseButton(0)) {
-			var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			RaycastHit hit;
-			if (col.Raycast(ray, out hit, float.MaxValue)) {
-				var uv = hit.textureCoord;
-				stamp.Draw(canvas, uv, scale * Vector2.one, density);
-				Debug.LogFormat("Draw on uv={0}", uv);
+			mat = GetComponent<Renderer>().sharedMaterial;
+			col = GetComponent<Collider>();
+
+			mat.mainTexture = canvas;
+		}
+		private void OnDisable() {
+			stamp.Dispose();
+			canvas.DestroySelf();
+		}
+		private void Update() {
+			if (Input.GetMouseButton(0)) {
+				var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+				RaycastHit hit;
+				if (col.Raycast(ray, out hit, float.MaxValue)) {
+					var uv = hit.textureCoord;
+					stamp.Draw(canvas, uv, scale * Vector2.one, density);
+					Debug.LogFormat("Draw on uv={0}", uv);
+				}
 			}
 		}
+		#endregion
 	}
-	#endregion
 }

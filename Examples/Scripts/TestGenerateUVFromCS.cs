@@ -4,36 +4,39 @@ using System.Collections.Generic;
 using UnityEngine;
 using WaterSimulationForGamesSystem.Core;
 
-public class TestGenerateUVFromCS : MonoBehaviour {
+namespace WaterSimulationForGames.Example {
 
-	[System.Serializable]
-	public class Dataset {
-		public int size = 100;
-	}
+	public class TestGenerateUVFromCS : MonoBehaviour {
 
-	[SerializeField]
-	protected Dataset ds;
+		[System.Serializable]
+		public class Dataset {
+			public int size = 100;
+		}
 
-	protected Material mat;
+		[SerializeField]
+		protected Dataset ds;
 
-	protected UV uv;
-	protected RenderTexture rt;
+		protected Material mat;
 
-	private void OnEnable() {
-		uv = new UV();
+		protected UV uv;
+		protected RenderTexture rt;
 
-		rt = new RenderTexture(ds.size, ds.size, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-		rt.antiAliasing = QualitySettings.antiAliasing;
-		rt.enableRandomWrite = true;
-		rt.Create();
+		private void OnEnable() {
+			uv = new UV();
 
-		mat = GetComponent<Renderer>().sharedMaterial;
+			rt = new RenderTexture(ds.size, ds.size, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+			rt.antiAliasing = QualitySettings.antiAliasing;
+			rt.enableRandomWrite = true;
+			rt.Create();
 
-		uv.Generate(rt);
-		mat.mainTexture = rt;
-	}
-	private void OnDisable() {
-		uv.Dispose();
-		rt.DestroySelf();
+			mat = GetComponent<Renderer>().sharedMaterial;
+
+			uv.Generate(rt);
+			mat.mainTexture = rt;
+		}
+		private void OnDisable() {
+			uv.Dispose();
+			rt.DestroySelf();
+		}
 	}
 }
