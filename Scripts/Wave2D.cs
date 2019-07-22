@@ -103,23 +103,8 @@ namespace WaterSimulationForGamesSystem {
 		}
 
 		public void SetBoundary(Texture2D srcImage) {
-			if (srcImage != null && srcImage.isReadable) {
-#if CPU_BASED
-				var duvdxy = new Vector2(1f / (b.width - 1), 1f / (b.height - 1));
-				var bupload = new List<int>(b.width * b.height);
-				for (var y = 0; y < b.height; y++) {
-					for (var x = 0; x < b.width; x++) {
-						var c = srcImage.GetPixelBilinear(
-							(x + 0.5f) * duvdxy.x,
-							(y + 0.5f) * duvdxy.y);
-						bupload.Add(c.r > 0.5f ? 1 : 0);
-					}
-				}
-				uploader.Upload(b, bupload);
-#else
-				boundary.Convert(b, srcImage);
-#endif
-			}
+			var foundsrc = (srcImage != null && srcImage.isReadable);
+			boundary.Convert(b, foundsrc ? srcImage : Texture2D.whiteTexture);
 		}
 
 		public void SetSize(int width, int height, bool quantize = false) {
