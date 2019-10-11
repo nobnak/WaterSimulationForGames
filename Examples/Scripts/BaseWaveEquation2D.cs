@@ -63,9 +63,10 @@ namespace WaterSimulationForGames.Example {
 		#region member
 		protected virtual Vector2Int GetResolution() {
 			var c = Camera.main;
-			var height = c.pixelHeight >> data.lod;
+			var height = (data.resolution > 0 ? data.resolution : c.pixelHeight >> data.lod);
 			var localScale = transform.localScale;
-			var reqSize = new Vector2Int(Mathf.RoundToInt(height * localScale.x / localScale.y), height);
+            var aspect = localScale.x / localScale.y;
+            var reqSize = new Vector2Int(Mathf.RoundToInt(height * aspect), height);
 			return reqSize;
 		}
 		protected virtual Vector4 GetParameters() {
@@ -84,6 +85,7 @@ namespace WaterSimulationForGames.Example {
 			public float intakeSize = 0.01f;
 			[Range(0, 4)]
 			public int lod = 1;
+            public int resolution = -1;
 			public Wave2D.ParamPack paramset = Wave2D.ParamPack.CreateDefault();
 		}
 		#endregion
