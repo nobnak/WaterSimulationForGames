@@ -57,6 +57,10 @@ namespace WaterSimulationForGames.Example {
 		#endregion
 
 		#region interface
+        public virtual void SetBoundary(Texture2D boundary) {
+            validator.Invalidate();
+            data.boundary = boundary;
+        }
 		public virtual Wave2D WaveSimulator { get { return wave; } }
 		#endregion
 
