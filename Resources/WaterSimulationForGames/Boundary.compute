@@ -7,11 +7,12 @@ float4 _Boundary_TexelSize;
 RWTexture2D<int> _Boundary;
 
 static const float threshold = 0.5;
+static const int _ColorIndex = 0;
 
 [numthreads(8,8,1)]
 void Convert (uint3 id : SV_DispatchThreadID) {
 	float2 uv = (id.xy + 0.5) * _Boundary_TexelSize.xy;
 	float4 c = _SrcImage.SampleLevel(sampler_SrcImage, uv, 0);
 
-	_Boundary[id.xy] = c.x < threshold ? 1 : 0;
+	_Boundary[id.xy] = c[_ColorIndex] < threshold ? 1 : 0;
 }

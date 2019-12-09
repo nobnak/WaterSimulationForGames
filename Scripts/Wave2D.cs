@@ -49,10 +49,11 @@ namespace WaterSimulationForGamesSystem {
 			boundary.Dispose();
 			ReleaseTextures();
 		}
-		#endregion
+        #endregion
 
-		#region properties
-		public Vector2Int Size { get { return size; } }
+        #region properties
+        public Boundary.ColorIndex BoundaryColorIndex { get; set; } = default;
+        public Vector2Int Size { get { return size; } }
 		public RenderTexture U { get { return u0; } }
 		public RenderTexture V { get { return v; } }
 		public RenderTexture B { get { return b; } }
@@ -104,7 +105,7 @@ namespace WaterSimulationForGamesSystem {
 
 		public void SetBoundary(Texture2D srcImage) {
 			var foundsrc = (srcImage != null && srcImage.isReadable);
-			boundary.Convert(b, foundsrc ? srcImage : Texture2D.whiteTexture);
+			boundary.Convert(b, foundsrc ? srcImage : Texture2D.whiteTexture, BoundaryColorIndex);
 		}
 
 		public void SetSize(int width, int height, bool quantize = false) {
