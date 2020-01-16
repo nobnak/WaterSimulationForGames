@@ -22,13 +22,13 @@ namespace WaterSimulationForGames.Example {
 
 		protected Validator validator = new Validator();
 
-		#region unity
-		protected virtual void OnEnable() {
+        #region unity
+        protected virtual void OnEnable() {
 			stamp = new Stamp();
 			wave = new Wave2D();
 
 			validator.Reset();
-			validator.SetCheckers(() => !transform.hasChanged);
+			validator.SetCheckers(() => !transform.hasChanged && CheckValidation());
 			validator.Validation += () => {
 				Vector2Int reqSize = GetResolution();
 				wave.SetSize(reqSize.x, reqSize.y);
@@ -62,10 +62,13 @@ namespace WaterSimulationForGames.Example {
             data.boundary = boundary;
         }
 		public virtual Wave2D WaveSimulator { get { return wave; } }
-		#endregion
+        #endregion
 
-		#region member
-		protected virtual Vector2Int GetResolution() {
+        #region member
+        protected virtual bool CheckValidation() {
+            return true;
+        }
+        protected virtual Vector2Int GetResolution() {
 			var c = Camera.main;
 			var height = (data.resolution > 0 ? data.resolution : c.pixelHeight >> data.lod);
 			var localScale = transform.localScale;
