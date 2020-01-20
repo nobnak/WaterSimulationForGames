@@ -6,7 +6,7 @@ Texture2D<float4> _SrcImage;
 float4 _Boundary_TexelSize;
 RWTexture2D<int> _Boundary;
 
-static const float threshold = 0.5;
+static const float threshold = 0.1;
 static const int _ColorIndex = 0;
 
 [numthreads(8,8,1)]
