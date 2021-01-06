@@ -27,10 +27,12 @@ namespace WaterSimulationForGamesSystem.Core {
 			K_NEXT = cs.FindKernel("Next");
 			K_CLAMP = cs.FindKernel("Clamp");
 
+            Unit = 1f;
 			Dt = 1f;
 			Damp = 0f;
 		}
 
+        public float Unit { get; set; }
 		public float Dt { get; set; }
 		public float Damp { get; set; }
 
@@ -74,7 +76,7 @@ namespace WaterSimulationForGamesSystem.Core {
 
 		#region member
 		private Vector4 Params() {
-			return new Vector4(Dt, Damp, 0, 0);
+			return new Vector4(Dt / Unit, Damp, 0, 0);
 		}
 		#endregion
 	}

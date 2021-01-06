@@ -1100,13 +1100,15 @@ MonoBehaviour:
     intakePower: 10
     intakeSize: 0.01
     lod: 1
+    resolution: 512
     paramset:
+      worldUnit: 1
       lightDir: {x: 0, y: 0, z: -1}
-      depthFieldAspect: 0.05
+      depthFieldAspect: 0.1
       normalScale: 1
       refractiveIndex: 0.752
-      speed: 30
-      dt: 0.01
+      speed: 50
+      dt: 0.1
       damping: 0.01
   outputMode: 5
   outputs:

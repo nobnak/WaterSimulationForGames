@@ -17,7 +17,6 @@ namespace WaterSimulationForGamesSystem {
 		protected Vector2Int size = Vector2Int.zero;
 		protected ParamPack pd;
 
-		protected Stamp stamp;
 		protected Clear clear;
 		protected Caustics caustics;
 		protected Normal2D normal;
@@ -42,7 +41,6 @@ namespace WaterSimulationForGamesSystem {
 		public void Dispose() {
 			wave.Dispose();
 			clear.Dispose();
-			stamp.Dispose();
 			normal.Dispose();
 			caustics.Dispose();
 			uploader.Dispose();
@@ -79,7 +77,6 @@ namespace WaterSimulationForGamesSystem {
 		#endregion
 
 		public Wave2D() {
-			stamp = new Stamp();
 			clear = new Clear();
 			normal = new Normal2D();
 			caustics = new Caustics();
@@ -91,10 +88,11 @@ namespace WaterSimulationForGamesSystem {
 			validator.Validation += () => {
 				time = 0f;
 
+                wave.Unit = pd.worldUnit;
 				wave.Dt = pd.dt;
-				wave.Damp = Mathf.Clamp01(pd.damping * pd.dt);
+				wave.Damp = Mathf.Clamp01(pd.damping * wave.Dt);
 
-				normal.Dxy = pd.normalScale;
+				normal.Dxy = pd.normalScale / pd.worldUnit;
 
 
 				caustics.Refractive = pd.refractiveIndex;
@@ -221,6 +219,7 @@ namespace WaterSimulationForGamesSystem {
 #region definitions
 		[System.Serializable]
 		public struct ParamPack : System.IEquatable<ParamPack> {
+            public float worldUnit;
 			public Vector3 lightDir;
 			[Header("Depth-Field aspect (water depth / field height)")]
 			public float depthFieldAspect;
@@ -232,7 +231,8 @@ namespace WaterSimulationForGamesSystem {
 
 #region static
 			public static ParamPack CreateDefault() {
-				return new ParamPack() {
+                return new ParamPack() {
+                    worldUnit = 1f,
 					lightDir = new Vector3(0f, 0f, -1f),
 					depthFieldAspect = 0.05f,
 					normalScale = 1f,
