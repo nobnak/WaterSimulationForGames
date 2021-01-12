@@ -75,6 +75,21 @@ namespace WaterSimulationForGames.Example {
 				rend.sharedMaterial = mat;
 			}
 		}
-		#endregion
-	}
+        #endregion
+
+        #region overrides
+        protected override Vector2Int GetResolution() {
+            var c = GetCamera();
+            var height = (data.resolution > 0)
+                ? data.resolution
+                : (c.pixelHeight >> data.lod);
+            var scale = transform.localScale;
+            var aspect = (float)scale.x / scale.y;
+            var width = Mathf.RoundToInt(height * aspect);
+            var res = new Vector2Int(width, height);
+            Debug.Log($"Water resolution={res}");
+            return res;
+        }
+        #endregion
+    }
 }

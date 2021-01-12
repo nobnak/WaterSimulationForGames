@@ -36,6 +36,8 @@ namespace WaterSimulationForGames.Example {
 				wave.Params = data.paramset;
 
 				transform.hasChanged = false;
+
+                Debug.Log($"{wave}");
 			};
 			validator.Validated += () => {
 				Validated?.Invoke();
@@ -74,22 +76,28 @@ namespace WaterSimulationForGames.Example {
             return true;
         }
         protected virtual Vector2Int GetResolution() {
-			var c = Camera.main;
-			var height = (data.resolution > 0 ? data.resolution : c.pixelHeight >> data.lod);
-			var localScale = transform.localScale;
-            var aspect = localScale.x / localScale.y;
-            var reqSize = new Vector2Int(Mathf.RoundToInt(height * aspect), height);
-			return reqSize;
+            var c = GetCamera();
+            var height = (data.resolution > 0)
+                ? data.resolution
+                : (c.pixelHeight >> data.lod);
+            var aspect = (float)c.pixelWidth / c.pixelHeight;
+            var width = Mathf.RoundToInt(height * aspect);
+            var res = new Vector2Int(width, height);
+            Debug.Log($"Water resolution={res}");
+            return res;
 		}
 		protected virtual Vector4 GetParameters() {
 			var depthFieldAspect = wave.DepthFieldAspect;
 			var p = new Vector4(depthFieldAspect.x, depthFieldAspect.y, data.paramset.refractiveIndex, 0f);
 			return p;
-		}
-		#endregion
+        }
+        protected virtual Camera GetCamera() {
+            return Camera.main;
+        }
+        #endregion
 
-		#region classes
-		[System.Serializable]
+        #region classes
+        [System.Serializable]
 		public class Data {
 			public FilterMode texfilter = FilterMode.Bilinear;
 			public Texture2D boundary;
