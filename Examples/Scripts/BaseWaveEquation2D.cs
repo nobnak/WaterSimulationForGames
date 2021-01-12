@@ -49,6 +49,11 @@ namespace WaterSimulationForGames.Example {
 			stamp.Dispose();
 		}
 		protected virtual void Update() {
+            var c = GetCamera();
+            var es = wave.CurrElasticData;
+            es.fieldSize = Mathf.Clamp((float)c.orthographicSize / data.cameraSizeStandard, 0.1f, 10f);
+            wave.CurrElasticData = es;
+
 			validator.Validate();
 			if (update) {
 				wave.Update();
@@ -93,6 +98,7 @@ namespace WaterSimulationForGames.Example {
 			[Range(0, 4)]
 			public int lod = 1;
             public int resolution = -1;
+            public float cameraSizeStandard = 20f;
 			public Wave2D.ParamPack paramset = Wave2D.ParamPack.CreateDefault();
 		}
 		#endregion

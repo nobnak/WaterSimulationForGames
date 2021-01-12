@@ -1,7 +1,9 @@
 using nobnak.Gist;
 using nobnak.Gist.Extensions.GPUExt;
+using nobnak.Gist.Extensions.ReflectionExt;
 using nobnak.Gist.ObjectExt;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using WaterSimulationForGamesSystem;
 using WaterSimulationForGamesSystem.Core;
@@ -15,7 +17,8 @@ namespace WaterSimulationForGamesSystem {
 		protected FilterMode texfilter = FilterMode.Bilinear;
 
 		protected Vector2Int size = Vector2Int.zero;
-		protected ParamPack pd;
+        protected ElasticData elastic = new ElasticData();
+        protected ParamPack pd;
 
 		protected Clear clear;
 		protected Caustics caustics;
@@ -61,7 +64,16 @@ namespace WaterSimulationForGamesSystem {
 		public RenderTexture Tmp0 { get { return tmp0; } }
 		public RenderTexture Tmp1 { get { return tmp1; } }
 
-		public ParamPack Params {
+        public ElasticData CurrElasticData {
+            get { return elastic; }
+            set {
+                if (!elastic.Equals(value)) {
+                    elastic = value;
+                    validator.Invalidate();
+                }
+            }
+        }
+        public ParamPack Params {
 			get { return pd; }
 			set {
 				if (pd != value) {
@@ -74,9 +86,15 @@ namespace WaterSimulationForGamesSystem {
 		public Vector2 DepthFieldAspect {
 			get { return pd.depthFieldAspect * new Vector2((float)size.y / size.x, 1f); }
 		}
-		#endregion
+        #endregion
 
-		public Wave2D() {
+        #region overrides
+        public override string ToString() {
+            return $"{GetType().Name} :\n\n{size}\n\n{elastic}\n\n{pd}";
+        }
+        #endregion
+
+        public Wave2D() {
 			clear = new Clear();
 			normal = new Normal2D();
 			caustics = new Caustics();
@@ -88,11 +106,14 @@ namespace WaterSimulationForGamesSystem {
 			validator.Validation += () => {
 				time = 0f;
 
-                wave.Unit = pd.worldUnit;
+                var ed = CurrElasticData;
+                var fieldSize = ed.fieldSize;
+
+                wave.FieldSize = fieldSize;
 				wave.Dt = pd.dt;
 				wave.Damp = Mathf.Clamp01(pd.damping * wave.Dt);
 
-				normal.Dxy = pd.normalScale / pd.worldUnit;
+				normal.Dxy = pd.normalScale * fieldSize;
 
 
 				caustics.Refractive = pd.refractiveIndex;
@@ -217,9 +238,41 @@ namespace WaterSimulationForGamesSystem {
 #endregion
 
 #region definitions
-		[System.Serializable]
+        public struct ElasticData : System.IEquatable<ElasticData> {
+            public float fieldSize;
+
+            #region static
+            public static ElasticData GenerateDefaults() {
+                return new ElasticData() {
+                    fieldSize = 1f,
+                };
+            }
+            #endregion
+
+            #region interface
+            
+            #region Object
+            public override string ToString() {
+                return $"{GetType().Name} : {nameof(fieldSize)}={fieldSize}";
+            }
+            public override int GetHashCode() {
+                return base.GetHashCode();
+            }
+            public override bool Equals(object obj) {
+                return (obj is ElasticData) && Equals((ElasticData)obj);
+            }
+            #endregion
+
+            #region IEquatable
+            public bool Equals(ElasticData b) {
+                return fieldSize == b.fieldSize;
+            }
+            #endregion
+
+            #endregion
+        }
+        [System.Serializable]
 		public struct ParamPack : System.IEquatable<ParamPack> {
-            public float worldUnit;
 			public Vector3 lightDir;
 			[Header("Depth-Field aspect (water depth / field height)")]
 			public float depthFieldAspect;
@@ -232,7 +285,6 @@ namespace WaterSimulationForGamesSystem {
 #region static
 			public static ParamPack CreateDefault() {
                 return new ParamPack() {
-                    worldUnit = 1f,
 					lightDir = new Vector3(0f, 0f, -1f),
 					depthFieldAspect = 0.05f,
 					normalScale = 1f,
@@ -277,8 +329,17 @@ namespace WaterSimulationForGamesSystem {
 				v = (v + damping.GetHashCode()) * 2801;
 				return v;
 			}
-#endregion
-		}
+            public override string ToString() {
+                var tmp = new StringBuilder();
+
+                tmp.Append($"{GetType().Name}:\n");
+                foreach (var f in GetType().GetInstancePublicFields()) {
+                    tmp.Append($"\t{f.Name}={f.GetValue(this)},\n");
+                }
+                return tmp.ToString();
+            }
+            #endregion
+        }
 #endregion
 	}
 }
