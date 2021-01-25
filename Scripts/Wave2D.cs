@@ -17,7 +17,6 @@ namespace WaterSimulationForGamesSystem {
 		protected FilterMode texfilter = FilterMode.Bilinear;
 
 		protected Vector2Int size = Vector2Int.zero;
-        protected ElasticData elastic = new ElasticData();
         protected ParamPack pd;
 
 		protected Clear clear;
@@ -64,15 +63,6 @@ namespace WaterSimulationForGamesSystem {
 		public RenderTexture Tmp0 { get { return tmp0; } }
 		public RenderTexture Tmp1 { get { return tmp1; } }
 
-        public ElasticData CurrElasticData {
-            get { return elastic; }
-            set {
-                if (!elastic.Equals(value)) {
-                    elastic = value;
-                    validator.Invalidate();
-                }
-            }
-        }
         public ParamPack Params {
 			get { return pd; }
 			set {
@@ -90,7 +80,7 @@ namespace WaterSimulationForGamesSystem {
 
         #region overrides
         public override string ToString() {
-            return $"{GetType().Name} :\n\n{size}\n\n{elastic}\n\n{pd}";
+            return $"{GetType().Name} :\n\n{size}\n\n{pd}";
         }
         #endregion
 
@@ -105,15 +95,10 @@ namespace WaterSimulationForGamesSystem {
 			validator.Reset();
 			validator.Validation += () => {
 				time = 0f;
-
-                var ed = CurrElasticData;
-                var fieldSize = ed.fieldSize;
-
-                wave.FieldSize = fieldSize;
 				wave.Dt = pd.dt;
 				wave.Damp = Mathf.Clamp01(pd.damping * wave.Dt);
 
-				normal.Dxy = pd.normalScale * fieldSize;
+				normal.Dxy = pd.normalScale;
 
 
 				caustics.Refractive = pd.refractiveIndex;
@@ -238,39 +223,6 @@ namespace WaterSimulationForGamesSystem {
 #endregion
 
 #region definitions
-        public struct ElasticData : System.IEquatable<ElasticData> {
-            public float fieldSize;
-
-            #region static
-            public static ElasticData GenerateDefaults() {
-                return new ElasticData() {
-                    fieldSize = 1f,
-                };
-            }
-            #endregion
-
-            #region interface
-            
-            #region Object
-            public override string ToString() {
-                return $"{GetType().Name} : {nameof(fieldSize)}={fieldSize}";
-            }
-            public override int GetHashCode() {
-                return base.GetHashCode();
-            }
-            public override bool Equals(object obj) {
-                return (obj is ElasticData) && Equals((ElasticData)obj);
-            }
-            #endregion
-
-            #region IEquatable
-            public bool Equals(ElasticData b) {
-                return fieldSize == b.fieldSize;
-            }
-            #endregion
-
-            #endregion
-        }
         [System.Serializable]
 		public struct ParamPack : System.IEquatable<ParamPack> {
 			public Vector3 lightDir;

@@ -3,6 +3,7 @@ using nobnak.Gist.Extensions.GPUExt;
 using nobnak.Gist.ObjectExt;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using WaterSimulationForGamesSystem;
 using WaterSimulationForGamesSystem.Core;
 
@@ -51,11 +52,6 @@ namespace WaterSimulationForGames.Example {
 			stamp.Dispose();
 		}
 		protected virtual void Update() {
-            var c = GetCamera();
-            var es = wave.CurrElasticData;
-            es.fieldSize = Mathf.Clamp((float)c.orthographicSize / data.cameraSizeStandard, 0.1f, 10f);
-            wave.CurrElasticData = es;
-
 			validator.Validate();
 			if (update) {
 				wave.Update();
@@ -77,9 +73,10 @@ namespace WaterSimulationForGames.Example {
         }
         protected virtual Vector2Int GetResolution() {
             var c = GetCamera();
-            var height = (data.resolution > 0)
-                ? data.resolution
+            var height = (data.resolutionStandard > 0)
+                ? data.resolutionStandard
                 : (c.pixelHeight >> data.lod);
+            //height = Mathf.RoundToInt(height * FieldSize);
             var aspect = (float)c.pixelWidth / c.pixelHeight;
             var width = Mathf.RoundToInt(height * aspect);
             var res = new Vector2Int(width, height);
@@ -94,6 +91,9 @@ namespace WaterSimulationForGames.Example {
         protected virtual Camera GetCamera() {
             return Camera.main;
         }
+        protected virtual float FieldSize {
+            get => Mathf.Clamp((float)GetCamera().orthographicSize / data.cameraSizeStandard, 0.1f, 10f);
+        }
         #endregion
 
         #region classes
@@ -105,7 +105,8 @@ namespace WaterSimulationForGames.Example {
 			public float intakeSize = 0.01f;
 			[Range(0, 4)]
 			public int lod = 1;
-            public int resolution = -1;
+            [FormerlySerializedAs("resolution")]
+            public int resolutionStandard = -1;
             public float cameraSizeStandard = 20f;
 			public Wave2D.ParamPack paramset = Wave2D.ParamPack.CreateDefault();
 		}

@@ -80,8 +80,8 @@ namespace WaterSimulationForGames.Example {
         #region overrides
         protected override Vector2Int GetResolution() {
             var c = GetCamera();
-            var height = (data.resolution > 0)
-                ? data.resolution
+            var height = (data.resolutionStandard > 0)
+                ? data.resolutionStandard
                 : (c.pixelHeight >> data.lod);
             var scale = transform.localScale;
             var aspect = (float)scale.x / scale.y;
