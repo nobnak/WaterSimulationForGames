@@ -1,4 +1,4 @@
-﻿#ifndef __WATER_CGINC__
+#ifndef __WATER_CGINC__
 #define __WATER_CGINC__
 
 
