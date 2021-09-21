@@ -1,4 +1,5 @@
 using nobnak.Gist;
+using nobnak.Gist.Cameras;
 using nobnak.Gist.Extensions.GPUExt;
 using nobnak.Gist.ObjectExt;
 using System.Collections.Generic;
@@ -22,15 +23,19 @@ namespace WaterSimulationForGames.Example {
 		protected Wave2D wave;
 
 		protected Validator validator = new Validator();
+		protected CameraData currCameraData;
 
-        #region unity
-        protected virtual void OnEnable() {
+		#region unity
+		protected virtual void OnEnable() {
 			stamp = new Stamp();
 			wave = new Wave2D();
 
 			validator.Reset();
-			validator.SetCheckers(() => !transform.hasChanged && CheckValidation());
+			validator.SetCheckers(() => !transform.hasChanged && currCameraData.Equals(GetCamera()));
 			validator.Validation += () => {
+				currCameraData = GetCamera();
+				if (GetCamera() == null) return;
+
 				Vector2Int reqSize = GetResolution();
 				wave.SetSize(reqSize.x, reqSize.y);
 				wave.SetBoundary(data.boundary);
@@ -68,9 +73,6 @@ namespace WaterSimulationForGames.Example {
         #endregion
 
         #region member
-        protected virtual bool CheckValidation() {
-            return true;
-        }
         protected virtual Vector2Int GetResolution() {
             var c = GetCamera();
             var height = (data.resolutionStandard > 0)
