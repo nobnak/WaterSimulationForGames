@@ -30,6 +30,7 @@ namespace WaterSimulationForGames.Example {
 			stamp = new Stamp();
 			wave = new Wave2D();
 
+			currCameraData = default;
 			validator.Reset();
 			validator.SetCheckers(() => !transform.hasChanged && currCameraData.Equals(GetCamera()));
 			validator.Validation += () => {
