@@ -23,7 +23,9 @@ namespace WaterSimulationForGames.Example {
 		#region unity
 		private void OnEnable() {
 			stamp = new Stamp();
-			canvas = new RenderTexture(512, 512, 0);
+			canvas = new RenderTexture(512, 512, 0) {
+				hideFlags = HideFlags.DontSave,
+			};
 
 			mat = GetComponent<Renderer>().sharedMaterial;
 			col = GetComponent<Collider>();

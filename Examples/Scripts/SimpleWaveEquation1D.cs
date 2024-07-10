@@ -141,13 +141,15 @@ namespace WaterSimulationForGames.Example {
 			var formatint = RenderTextureFormat.RInt;
 			v = new RenderTexture(count, 1, 0, formatfloat) {
 				enableRandomWrite = true,
-				useMipMap = false
+				useMipMap = false,
+				hideFlags = HideFlags.DontSave,
 			};
-			u0 = new RenderTexture(v.descriptor);
-			u1 = new RenderTexture(v.descriptor);
+			u0 = new RenderTexture(v.descriptor) { hideFlags = HideFlags.DontSave, };
+			u1 = new RenderTexture(v.descriptor) { hideFlags = HideFlags.DontSave, };
 			b = new RenderTexture(count, 1, 0, formatint, RenderTextureReadWrite.Linear) {
 				enableRandomWrite = true,
-				useMipMap = false
+				useMipMap = false,
+				hideFlags = HideFlags.DontSave,
 			};
 			v.filterMode = u0.filterMode = u1.filterMode = FilterMode.Point;
 			v.wrapMode = u0.wrapMode = u1.wrapMode = TextureWrapMode.Clamp;

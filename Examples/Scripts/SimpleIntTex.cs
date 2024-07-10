@@ -24,8 +24,9 @@ namespace WaterSimulationForGames.Example {
 
 			var format = RenderTextureFormat.RInt;
 			tex = new RenderTexture(count, 1, 0, format, RenderTextureReadWrite.Linear) {
-				enableRandomWrite = true
-			};
+				enableRandomWrite = true,
+                hideFlags = HideFlags.DontSave,
+            };
 			tex.Create();
 
 			mat = GetComponent<Renderer>().sharedMaterial;

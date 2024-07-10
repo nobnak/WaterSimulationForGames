@@ -160,30 +160,40 @@ namespace WaterSimulationForGamesSystem {
 			var formati = RenderTextureFormat.RInt;
 			v = new RenderTexture(size.x, size.y, 0, formatf) {
 				enableRandomWrite = true,
-				useMipMap = false
+				useMipMap = false,
+				hideFlags = HideFlags.DontSave,
 			};
-			u0 = new RenderTexture(v.descriptor);
-			u1 = new RenderTexture(v.descriptor);
+			u0 = new RenderTexture(v.descriptor) {
+				hideFlags = HideFlags.DontSave,
+			};
+			u1 = new RenderTexture(v.descriptor) {
+				hideFlags = HideFlags.DontSave,
+			};
 			b = new RenderTexture(size.x, size.y, 0, formati) {
 				enableRandomWrite = true,
 				useMipMap = false,
-			};
+                hideFlags = HideFlags.DontSave,
+            };
 			n = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGBFloat) {
 				enableRandomWrite = true,
 				useMipMap = false,
-			};
+                hideFlags = HideFlags.DontSave,
+            };
 			tmp0 = new RenderTexture(size.x, size.y, 0, RenderTextureFormat.ARGBFloat) {
 				enableRandomWrite = true,
 				useMipMap = false,
-			};
+                hideFlags = HideFlags.DontSave,
+            };
 			tmp1 = new RenderTexture(tmp0.descriptor) {
 				enableRandomWrite = true,
 				useMipMap = false,
-			};
+                hideFlags = HideFlags.DontSave,
+            };
 			c = new RenderTexture(v.descriptor) {
 				enableRandomWrite = true,
 				useMipMap = false,
-			};
+                hideFlags = HideFlags.DontSave,
+            };
 			v.Create();
 			u0.Create();
 			u1.Create();

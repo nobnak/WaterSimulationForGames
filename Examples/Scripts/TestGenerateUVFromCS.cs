@@ -24,9 +24,11 @@ namespace WaterSimulationForGames.Example {
 		private void OnEnable() {
 			uv = new UV();
 
-			rt = new RenderTexture(ds.size, ds.size, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-			rt.antiAliasing = QualitySettings.antiAliasing;
-			rt.enableRandomWrite = true;
+			rt = new RenderTexture(ds.size, ds.size, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear) {
+				antiAliasing = QualitySettings.antiAliasing,
+				enableRandomWrite = true,
+				hideFlags = HideFlags.DontSave,
+			};
 			rt.Create();
 
 			mat = GetComponent<Renderer>().sharedMaterial;
